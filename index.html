@@ -153,14 +153,67 @@
       .gen-box pre{ margin:.5rem 0 0; max-height:10rem; overflow-y:auto; white-space:pre-wrap; overflow-wrap:anywhere; font-size:.875rem; color:var(--a-text); }
       .log-row{ display:flex; flex-wrap:wrap; align-items:center; gap:.5rem; border:1px solid var(--a-border); background:#fff; border-radius:.75rem; padding:.625rem 1rem; }
       .log-row .lt{ margin-left:auto; font-size:13px; color:var(--a-dim); }
-      .expiry-row{ display:flex; flex-wrap:wrap; gap:.5rem; align-items:flex-end; margin-top:.5rem; }
-      .expiry-row .grow{ flex:1; min-width:180px; }
+      .expiry-row{ display:flex; flex-wrap:wrap; gap:.5rem; align-items:stretch; margin-top:.5rem; width:100%; }
+      .expiry-row .grow{ flex:1 1 100%; min-width:0; width:100%; }
+      .expiry-row .a-btn-ghost{ flex:1 1 auto; min-width:0; }
+      .bind-box{ margin-top:.75rem; border-top:1px dashed var(--a-border); padding-top:.75rem; display:flex; flex-direction:column; gap:.5rem; width:100%; }
+      .bind-box .bind-title{ font-size:.875rem; font-weight:700; color:#33413d; margin:0; }
+      .bind-box select{ width:100%; min-width:0; max-width:100%; }
+      .bind-account{ margin:.375rem 0 0; font-size:.875rem; line-height:1.6; color:#33413d; background:#f4f7f6; border-radius:.5rem; padding:.5rem .75rem; overflow-wrap:anywhere; word-break:break-word; }
+      .bind-account b{ color:var(--a-text); }
+      .inv-bind{ margin-top:.5rem; display:flex; flex-direction:column; gap:.5rem; width:100%; }
+      .inv-bind select{ width:100%; min-width:0; max-width:100%; }
       .sync-bar{ display:flex; flex-wrap:wrap; align-items:center; gap:.5rem .75rem; border:1px solid var(--a-border); background:#fff; border-radius:1rem; padding:.75rem 1rem; margin-bottom:1.25rem; font-size:.875rem; color:#33413d; }
       .preview-box{ margin-top:1rem; border:1px solid #274d45; border-radius:.75rem; background:#0f2420; color:#cfe4de; padding:.75rem; max-height:22rem; overflow:auto; }
       .preview-box pre{ margin:0; font-size:12px; line-height:1.6; white-space:pre-wrap; overflow-wrap:anywhere; font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; }
       .pub-steps{ margin:.5rem 0 0; padding-left:1.25rem; font-size:.875rem; line-height:1.9; color:#33413d; }
       .token-note{ margin:.5rem 0 0; font-size:.875rem; line-height:1.8; color:var(--a-dim); }
       .loading{ padding:4rem 1rem; text-align:center; font-size:.875rem; color:var(--dim); }
+      /* ---------- Responsive hardening (all devices) ---------- */
+      html,body{ max-width:100%; overflow-x:hidden; }
+      input,select,textarea,button{ max-width:100%; }
+      .a-input,.code-input{ min-width:0; width:100%; }
+      .row-card,.panel,.card{ overflow:hidden; }
+      .row-title,.mono{ overflow-wrap:anywhere; word-break:break-word; }
+      .admin-nav{ flex-wrap:wrap; overflow-x:visible; }
+      .btn-row{ width:100%; }
+      .btn-row > *{ min-width:0; }
+      .field-row{ flex-wrap:wrap; }
+      .field-row span{ overflow-wrap:anywhere; }
+      .stat-grid{ width:100%; }
+      .sync-bar{ overflow-wrap:anywhere; }
+      .log-row{ overflow-wrap:anywhere; }
+      @media (min-width:641px){
+        .expiry-row .grow{ flex:1 1 220px; }
+        .expiry-row .a-btn-ghost{ flex:0 1 auto; }
+      }
+      @media (max-width:640px){
+        .front-wrap{ padding:0 .75rem 2rem; }
+        .front-head{ flex-wrap:wrap; }
+        .hero h1{ font-size:28px; }
+        .card{ padding:1rem; border-radius:1rem; }
+        .admin-main{ padding:1rem .75rem 2.5rem; }
+        .admin-head-in{ padding:.75rem .75rem 0; }
+        .panel{ padding:.875rem; }
+        .row-card{ padding:.75rem; }
+        .stat .sv{ font-size:1.5rem; }
+        .grid2,.grid3{ grid-template-columns:1fr !important; }
+        .expiry-row{ flex-direction:column; align-items:stretch; }
+        .expiry-row .grow,.expiry-row .a-btn-ghost{ flex:none; width:100%; }
+        .btn-row{ flex-direction:column; align-items:stretch; }
+        .btn-row .a-btn,.btn-row .a-btn-ghost,.btn-row .a-btn-danger,.btn-row .a-btn-danger-solid{ width:100%; text-align:center; }
+        .btn-row .copy-btn{ width:100%; }
+        .row-top{ flex-direction:column; align-items:stretch; }
+        .row-top .pill{ align-self:flex-start; }
+        .log-row .lt{ margin-left:0; width:100%; }
+        .sync-bar{ flex-direction:column; align-items:stretch; }
+        .gate-wrap{ padding:1rem .75rem; }
+        .gen-box pre{ font-size:13px; }
+      }
+      @media (min-width:641px) and (max-width:900px){
+        .admin-main{ padding:1.25rem 1rem 3rem; }
+        .grid3{ grid-template-columns:1fr 1fr !important; }
+      }
     </style>
   </head>
   <body>
@@ -239,8 +292,7 @@
     function cardStatus(card, now){
       if (card.disabled) return "disabled";
       if (card.expiresAt != null && card.expiresAt < now) return "expired";
-      if (card.queryCount > 0) return "queried";
-      return "unused";
+      return "active";
     }
     function genCode(){
       var alphabet = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
@@ -597,9 +649,6 @@
         log(false, "尚未備貨"); saveDb();
         return { ok: false, message: "這張卡密尚未備妥交付資料，請稍後再試或聯繫發卡方。" };
       }
-      card.queryCount = (card.queryCount || 0) + 1;
-      if (card.firstQueriedAt == null) card.firstQueriedAt = now;
-      card.lastQueriedAt = now;
       log(true, "查詢成功"); saveDb();
       return {
         ok: true,
@@ -618,6 +667,26 @@
       DB.logs.unshift({ id: DB.seq.log++, codeMasked: maskCode(code), success: success, reason: reason, createdAt: Date.now() });
       if (DB.logs.length > 500) DB.logs.length = 500;
     }
+    function invById(id){
+      if (id == null) return null;
+      return DB.inventory.find(function(x){ return x.id === id; }) || null;
+    }
+    function cardById(id){
+      if (id == null) return null;
+      return DB.cards.find(function(x){ return x.id === id; }) || null;
+    }
+    function boundAccountLabel(card){
+      var inv = card && card.inventoryId != null ? invById(card.inventoryId) : null;
+      return inv ? inv.account : null;
+    }
+    function validateCustomCode(raw){
+      var c = String(raw || "").trim().toUpperCase();
+      if (!c) return { ok: false, msg: "請輸入自訂卡密" };
+      if (/^[A-Z0-9]{4}(-[A-Z0-9]{4}){4}$/.test(c)) return { ok: true, code: c };
+      var compact = c.replace(/-/g, "");
+      if (c.length >= 20 && /^[A-Z0-9-]+$/.test(c) && compact.length >= 20) return { ok: true, code: c };
+      return { ok: false, msg: "自訂卡密格式不正確：請用 5 段格式（例如 ABCD-EFGH-JKMN-PQRS-TUVW，每段 4 個英數字），或至少 20 字元、只含英文字母／數字／連字號。" };
+    }
 
     /* 前台查詢：先查 GitHub 上的加密 data.json，查不到再查本地（同裝置）資料 */
     function lookupCardAsync(rawCode){
@@ -629,22 +698,17 @@
             if (!entry) return lookupLocal(code);
             return decryptPayload(code, entry).then(function(payload){
               if (!payload){
-                logLookup(code, false, "查無此卡密"); saveDb();
                 return { ok: false, message: "查無此卡密，請核對字元後再試一次。" };
               }
               if (payload.disabled){
-                logLookup(code, false, "卡密已停用"); saveDb();
                 return { ok: false, message: "這張卡密已被停用，請聯繫發卡方處理。" };
               }
               if (payload.expiresAt != null && payload.expiresAt < Date.now()){
-                logLookup(code, false, "卡密已過期"); saveDb();
                 return { ok: false, message: "這張卡密已超過有效期限，請聯繫發卡方處理。" };
               }
               if (!payload.stocked){
-                logLookup(code, false, "尚未備貨"); saveDb();
                 return { ok: false, message: "這張卡密尚未備妥交付資料，請稍後再試或聯繫發卡方。" };
               }
-              logLookup(code, true, "查詢成功"); saveDb();
               var siteIns = (remote.site && remote.site.instructions) || DB.settings.instructions || "";
               return {
                 ok: true,
@@ -861,6 +925,7 @@
     }
 
     function renderAdmin(){
+      try { DB = loadDb(); } catch (e) {}
       var app = document.getElementById("app");
       if (!isLoggedIn()){ renderGate(app); return; }
       var s = DB.settings;
@@ -951,11 +1016,12 @@
 
     function overviewHtml(){
       var now = Date.now();
-      var st = { unused: 0, queried: 0, expired: 0, disabled: 0 };
+      var st = { active: 0, expired: 0, disabled: 0 };
       DB.cards.forEach(function(c){ st[cardStatus(c, now)]++; });
       var avail = DB.inventory.filter(function(i){ return i.boundCardId == null; }).length;
+      var boundCards = DB.cards.filter(function(c){ return c.inventoryId != null; }).length;
       var stats = [
-        ["卡密總數", DB.cards.length], ["未查詢", st.unused], ["已查詢", st.queried],
+        ["卡密總數", DB.cards.length], ["已綁定卡密", boundCards], ["未綁定卡密", DB.cards.length - boundCards],
         ["已過期", st.expired], ["已停用", st.disabled],
         ["庫存總數", DB.inventory.length], ["未綁定庫存", avail], ["商品數", DB.products.length]
       ];
@@ -995,13 +1061,27 @@
       if (DB.inventory.length === 0){
         html += '<p class="empty">庫存是空的。用上方表單單筆新增，或用批次匯入貼上你合法持有的交付內容。</p>';
       }
+      var unboundCards = DB.cards.filter(function(c){ return c.inventoryId == null; });
       DB.inventory.slice().reverse().forEach(function(it){
+        var boundCard = it.boundCardId != null ? cardById(it.boundCardId) : null;
         html += '<div class="row-card"><div class="row-top"><p class="row-main row-title mono">' + esc(it.account) + '</p>' +
-          (it.boundCardId != null
+          (boundCard
             ? '<span class="pill pill-bound">已綁定卡密</span>'
             : '<span class="pill pill-free">未綁定</span>') +
-          '</div><p class="row-meta">' + esc(it.productName || "未指定商品") + '・密碼 ' + esc(it.password) + (it.verifyUrl ? '・附驗證碼網址' : "") + '</p>' +
-          '<div class="btn-row"><button type="button" class="a-btn-ghost" data-inv-edit="' + it.id + '">編輯</button>' +
+          '</div><p class="row-meta">' + esc(it.productName || "未指定商品") + '・密碼 ' + esc(it.password) + (it.verifyUrl ? '・附驗證碼網址' : "") + '</p>';
+        if (boundCard){
+          html += '<p class="bind-account">綁定卡密：<b class="mono">' + esc(boundCard.code) + '</b></p>' +
+            '<div class="btn-row"><button type="button" class="copy-btn" data-copy="' + esc(boundCard.code) + '" data-label="複製卡密">複製卡密</button>' +
+            '<button type="button" class="a-btn-ghost" data-inv-unbind="' + it.id + '">解除綁定</button></div>';
+        } else {
+          html += '<p class="bind-account">綁定卡密：<b>未綁定</b>（買家還無法用卡密領這筆帳號）</p>' +
+            '<div class="inv-bind"><label class="a-label" for="inv-bind-sel-' + it.id + '">綁定卡密（選一張未綁定的卡密）</label>' +
+            '<select id="inv-bind-sel-' + it.id + '" class="a-input"><option value="">— 請選擇卡密 —</option>' +
+            unboundCards.map(function(c){ return '<option value="' + c.id + '">' + esc(c.code) + (c.productId != null ? '（商品：' + esc(productNameById(c.productId)) + '）' : '') + '</option>'; }).join("") +
+            '</select><div class="btn-row" style="margin-top:0"><button type="button" class="a-btn-ghost" data-inv-bind-existing="' + it.id + '">綁定所選卡密</button>' +
+            '<button type="button" class="a-btn" data-inv-gen-card="' + it.id + '">為此帳號產生新卡密</button></div></div>';
+        }
+        html += '<div class="btn-row"><button type="button" class="a-btn-ghost" data-inv-edit="' + it.id + '">編輯</button>' +
           (it.boundCardId == null ? '<button type="button" class="a-btn-danger" data-inv-del="' + it.id + '">刪除</button>' : "") +
           '</div></div>';
       });
@@ -1109,11 +1189,51 @@
           });
         });
       });
+      document.querySelectorAll("[data-inv-bind-existing]").forEach(function(b){
+        b.addEventListener("click", function(){
+          var invId = Number(b.getAttribute("data-inv-bind-existing"));
+          var sel = document.getElementById("inv-bind-sel-" + invId);
+          var cardId = sel && sel.value ? Number(sel.value) : null;
+          if (cardId == null){ adminState.invMsg = ""; adminState.invError = "請先選擇一張未綁定的卡密，再按綁定。"; renderAdmin(); window.scrollTo(0,0); return; }
+          var inv = invById(invId); var card = cardById(cardId);
+          if (!inv || !card){ renderAdmin(); return; }
+          if (inv.boundCardId != null){ var old = cardById(inv.boundCardId); if (old) old.inventoryId = null; }
+          if (card.inventoryId != null){ var oldInv = invById(card.inventoryId); if (oldInv) oldInv.boundCardId = null; }
+          card.inventoryId = inv.id; inv.boundCardId = card.id;
+          if (inv.productId != null) card.productId = inv.productId;
+          adminState.invError = ""; adminState.invMsg = "已把卡密 " + card.code + " 綁到帳號 " + inv.account + "，並已觸發同步。";
+          afterMutation(); renderAdmin(); window.scrollTo(0,0);
+        });
+      });
+      document.querySelectorAll("[data-inv-unbind]").forEach(function(b){
+        b.addEventListener("click", function(){
+          var inv = invById(Number(b.getAttribute("data-inv-unbind")));
+          if (!inv) return;
+          var card = inv.boundCardId != null ? cardById(inv.boundCardId) : null;
+          if (card) card.inventoryId = null;
+          inv.boundCardId = null;
+          adminState.invMsg = "已解除綁定，並已觸發同步。"; adminState.invError = "";
+          afterMutation(); renderAdmin();
+        });
+      });
+      document.querySelectorAll("[data-inv-gen-card]").forEach(function(b){
+        b.addEventListener("click", function(){
+          var inv = invById(Number(b.getAttribute("data-inv-gen-card")));
+          if (!inv) return;
+          var existing = {}; DB.cards.forEach(function(c){ existing[c.code] = true; });
+          var code = genCode(); while (existing[code]) code = genCode();
+          var card = { id: DB.seq.card++, code: code, inventoryId: inv.id, productId: inv.productId != null ? inv.productId : null, expiresAt: null, disabled: false, queryCount: 0, firstQueriedAt: null, lastQueriedAt: null, createdAt: Date.now() };
+          DB.cards.push(card); inv.boundCardId = card.id;
+          adminState.generated = [code];
+          adminState.invError = ""; adminState.invMsg = "已為帳號 " + inv.account + " 產生新卡密：" + code + "（也可在「卡密」分頁查看），並已觸發同步。";
+          afterMutation(); renderAdmin(); window.scrollTo(0,0);
+        });
+      });
     }
 
     /* ---- 卡密 ---- */
     var CARD_STATUS = {
-      unused: ["未查詢", "pill-unused"], queried: ["已查詢", "pill-queried"],
+      active: ["可使用", "pill-queried"],
       expired: ["已過期", "pill-expired"], disabled: ["已停用", "pill-disabled"]
     };
     function cardsHtml(){
@@ -1125,7 +1245,13 @@
         '<div><label class="a-label" for="gen-product">指定商品（選填）</label><select id="gen-product" class="a-input">' + productOptions("", "不指定") + '</select></div>' +
         '<div><label class="a-label" for="gen-expiry">有效期限（選填）</label><input id="gen-expiry" class="a-input" type="datetime-local" /></div>' +
         '</div>' +
-        '<label class="check-row"><input type="checkbox" id="gen-bind" checked />立即綁定未使用的庫存（庫存不足時，其餘卡密會在發布／查詢時自動配對同商品庫存）</label>' +
+        '<div class="grid2" style="margin-top:.75rem">' +
+        '<div><label class="a-label" for="gen-inventory">指定綁定庫存帳號（選填，第一張卡密綁這筆）</label><select id="gen-inventory" class="a-input"><option value="">不指定（用下方自動綁定）</option>' +
+        DB.inventory.filter(function(i){ return i.boundCardId == null; }).map(function(i){ return '<option value="' + i.id + '">' + esc(i.account) + '（' + esc(i.productName || "未指定商品") + '）</option>'; }).join("") +
+        '</select></div>' +
+        '<div><label class="a-label" for="gen-custom">自訂卡密（選填，僅產生 1 張時可用）</label><input id="gen-custom" class="a-input mono" placeholder="例如 ABCD-EFGH-JKMN-PQRS-TUVW" autocomplete="off" autocapitalize="characters" /><p class="row-meta-sm" style="margin-top:.25rem">格式：5 段、每段 4 個英數字，或至少 20 字元（英數字與 -）。留空則隨機產生。</p></div>' +
+        '</div>' +
+        '<label class="check-row"><input type="checkbox" id="gen-bind" checked />立即綁定未使用的庫存（庫存不足時，其餘卡密會在發布／查詢時自動配對同商品庫存；有指定綁定庫存時以指定為準）</label>' +
         (adminState.genError ? '<p class="form-err">' + esc(adminState.genError) + '</p>' : "") +
         '<div class="btn-row"><button type="submit" class="a-btn">產生卡密</button></div>';
       if (adminState.generated.length){
@@ -1135,31 +1261,55 @@
       }
       html += '</form>' +
         '<div style="margin-top:1rem"><label class="a-label" for="card-search">搜尋卡密</label>' +
-        '<input id="card-search" class="a-input" placeholder="輸入卡密片段搜尋" autocomplete="off" value="' + esc(adminState.cardSearch) + '" /></div>' +
+        '<input id="card-search" class="a-input" placeholder="輸入卡密片段或綁定帳號搜尋" autocomplete="off" value="' + esc(adminState.cardSearch) + '" /></div>' +
         '<div class="list" id="cards-list">' + cardsListHtml() + '</div></section>';
       return html;
     }
     function cardsListHtml(){
-      var q = adminState.cardSearch.trim().toUpperCase();
+      var qRaw = adminState.cardSearch.trim();
+      var q = qRaw.toUpperCase();
+      var qLow = qRaw.toLowerCase();
       var now = Date.now();
-      var list = DB.cards.slice().reverse().filter(function(c){ return !q || c.code.indexOf(q) >= 0; }).slice(0, 300);
+      var list = DB.cards.slice().reverse().filter(function(c){
+        if (!q) return true;
+        if (c.code.indexOf(q) >= 0) return true;
+        var acc = boundAccountLabel(c);
+        return acc && acc.toLowerCase().indexOf(qLow) >= 0;
+      }).slice(0, 300);
       if (!list.length){
         return '<p class="empty">' + (DB.cards.length ? "沒有符合搜尋的卡密。" : "尚無卡密，用上方表單批次產生。") + '</p>';
       }
       return list.map(function(c){
-        var st = CARD_STATUS[cardStatus(c, now)] || CARD_STATUS.unused;
-        return '<div class="row-card"><div class="row-top"><p class="row-main row-title mono">' + esc(c.code) + '</p>' +
+        var st = CARD_STATUS[cardStatus(c, now)] || CARD_STATUS.active;
+        var boundInv = c.inventoryId != null ? invById(c.inventoryId) : null;
+        var prodName = boundInv ? (boundInv.productName || productNameById(c.productId)) : productNameById(c.productId);
+        var html = '<div class="row-card"><div class="row-top"><p class="row-main row-title mono">' + esc(c.code) + '</p>' +
           '<span class="pill ' + st[1] + '">' + st[0] + '</span>' +
-          '<button type="button" class="copy-btn" data-copy="' + esc(c.code) + '" data-label="複製卡密">複製卡密</button></div>' +
-          '<p class="row-meta-sm">商品：' + esc(productNameById(c.productId)) + '・查詢 ' + (c.queryCount || 0) + ' 次<br />' +
-          '首次查詢：' + fmtTime(c.firstQueriedAt) + '・最近查詢：' + fmtTime(c.lastQueriedAt) + '<br />' +
-          '有效期限：' + (c.expiresAt ? fmtTime(c.expiresAt) : "不限") + '</p>' +
+          (boundInv ? '<span class="pill pill-bound">已綁定</span>' : '<span class="pill pill-free">未綁定</span>') +
+          '<button type="button" class="copy-btn" data-copy="' + esc(c.code) + '" data-label="複製卡密">複製卡密</button></div>';
+        if (boundInv){
+          html += '<p class="bind-account">綁定帳號：<b class="mono">' + esc(boundInv.account) + '</b><br />商品：' + esc(prodName || "—") + '・密碼 ' + esc(boundInv.password) + '</p>';
+        } else if (c.productId != null){
+          html += '<p class="bind-account">綁定帳號：<b>未綁定</b>（指定商品：' + esc(prodName || "—") + '，查詢時自動配對同商品未綁定庫存）</p>';
+        } else {
+          html += '<p class="bind-account">綁定帳號：<b>未綁定</b>（請用下方「改綁」指定一個帳號）</p>';
+        }
+        html += '<p class="row-meta-sm">有效期限：' + (c.expiresAt ? fmtTime(c.expiresAt) : "不限") + '</p>' +
+          '<div class="bind-box"><p class="bind-title">改綁帳號</p>' +
+          '<label class="a-label" for="rebind-' + c.id + '">選擇要綁定的庫存帳號</label>' +
+          '<select id="rebind-' + c.id + '" class="a-input"><option value="">— 未綁定（解除綁定）—</option>' +
+          DB.inventory.map(function(inv){
+            var taken = inv.boundCardId != null && inv.boundCardId !== c.id;
+            return '<option value="' + inv.id + '"' + (c.inventoryId === inv.id ? " selected" : "") + '>' + esc(inv.account) + '（' + esc(inv.productName || "未指定商品") + '）' + (taken ? '・已綁其他卡密，改綁會轉移' : '') + '</option>';
+          }).join("") +
+          '</select><div class="btn-row" style="margin-top:0"><button type="button" class="a-btn" data-card-rebind="' + c.id + '">確認改綁</button></div></div>' +
           '<div class="expiry-row"><div class="grow"><label class="a-label" for="exp-' + c.id + '">修改有效期限</label>' +
           '<input id="exp-' + c.id + '" class="a-input" type="datetime-local" value="' + toLocalInput(c.expiresAt) + '" /></div>' +
           '<button type="button" class="a-btn-ghost" data-card-exp-save="' + c.id + '">儲存期限</button>' +
           '<button type="button" class="a-btn-ghost" data-card-exp-clear="' + c.id + '">清除期限</button></div>' +
           '<div class="btn-row"><button type="button" class="a-btn-ghost" data-card-toggle="' + c.id + '">' + (c.disabled ? "啟用" : "停用") + '</button>' +
           '<button type="button" class="a-btn-danger" data-card-del="' + c.id + '">刪除</button></div></div>';
+        return html;
       }).join("");
     }
     function wireCardsList(){
@@ -1204,6 +1354,40 @@
           refreshCardsList();
         });
       });
+      wrap.querySelectorAll("[data-card-rebind]").forEach(function(b){
+        b.addEventListener("click", function(){
+          var id = Number(b.getAttribute("data-card-rebind"));
+          var card = cardById(id);
+          var sel = document.getElementById("rebind-" + id);
+          if (!card || !sel) return;
+          var newInvId = sel.value ? Number(sel.value) : null;
+          if (newInvId === card.inventoryId){ refreshCardsList(); return; }
+          // 釋放原庫存
+          if (card.inventoryId != null){
+            var oldInv = invById(card.inventoryId);
+            if (oldInv && oldInv.boundCardId === card.id) oldInv.boundCardId = null;
+            card.inventoryId = null;
+          }
+          if (newInvId != null){
+            var newInv = invById(newInvId);
+            if (newInv){
+              // 若新庫存原本綁了另一張卡，先解除那張卡
+              if (newInv.boundCardId != null && newInv.boundCardId !== card.id){
+                var other = cardById(newInv.boundCardId);
+                if (other) other.inventoryId = null;
+              }
+              newInv.boundCardId = card.id;
+              card.inventoryId = newInv.id;
+              if (newInv.productId != null) card.productId = newInv.productId;
+            }
+          }
+          afterMutation();
+          refreshCardsList();
+          // refreshCardsList 只換列表，庫存下拉狀態已隨 DB 更新；提示同步已觸發
+          var bar = document.getElementById("sync-bar");
+          if (bar) bar.scrollIntoView({ block: "nearest" });
+        });
+      });
     }
     function refreshCardsList(){
       var wrap = document.getElementById("cards-list");
@@ -1216,25 +1400,43 @@
         if (!Number.isInteger(n) || n < 1 || n > 200){
           adminState.genError = "數量請輸入 1 到 200"; renderAdmin(); return;
         }
+        var customRaw = (document.getElementById("gen-custom") ? document.getElementById("gen-custom").value : "").trim();
+        var customCode = null;
+        if (customRaw){
+          if (n !== 1){ adminState.genError = "自訂卡密只能在「產生數量 = 1」時使用，請把數量改成 1，或清空自訂卡密改用隨機產生。"; renderAdmin(); return; }
+          var v = validateCustomCode(customRaw);
+          if (!v.ok){ adminState.genError = v.msg; renderAdmin(); return; }
+          customCode = v.code;
+          var dup = DB.cards.some(function(c){ return c.code === customCode; });
+          if (dup){ adminState.genError = "這張自訂卡密已經存在，請換一張（卡密不可重複）。"; renderAdmin(); return; }
+        }
         var pidVal = document.getElementById("gen-product").value;
         var pid = pidVal ? Number(pidVal) : null;
         var bind = document.getElementById("gen-bind").checked;
         var expiryVal = document.getElementById("gen-expiry").value;
         var expiresAt = expiryVal ? new Date(expiryVal).getTime() : null;
+        var specSel = document.getElementById("gen-inventory");
+        var specInv = specSel && specSel.value ? invById(Number(specSel.value)) : null;
+        if (specSel && specSel.value && !specInv){ adminState.genError = "指定的庫存不存在，請重新選擇。"; renderAdmin(); return; }
+        if (specInv && specInv.boundCardId != null){ adminState.genError = "指定的帳號「" + specInv.account + "」已經綁定其他卡密，請先解除或改選未綁定帳號。"; renderAdmin(); return; }
+        if (specInv && specInv.productId != null) pid = specInv.productId;
         var pool = bind
-          ? DB.inventory.filter(function(i){ return i.boundCardId == null && (pid == null || i.productId === pid); })
+          ? DB.inventory.filter(function(i){ return i.boundCardId == null && (!specInv || i.id !== specInv.id) && (pid == null || i.productId === pid); })
           : [];
         var existing = {};
         DB.cards.forEach(function(c){ existing[c.code] = true; });
         var codes = [];
         for (var k = 0; k < n; k++){
-          var code = genCode();
-          while (existing[code]) code = genCode();
+          var code;
+          if (k === 0 && customCode){ code = customCode; }
+          else { code = genCode(); while (existing[code]) code = genCode(); }
           existing[code] = true;
-          var inv = pool[k] || null;
+          var inv = null;
+          if (k === 0 && specInv) inv = specInv;
+          else if (bind) inv = pool.shift() || null;
           var card = {
             id: DB.seq.card++, code: code,
-            inventoryId: inv ? inv.id : null, productId: pid,
+            inventoryId: inv ? inv.id : null, productId: inv && inv.productId != null ? inv.productId : pid,
             expiresAt: expiresAt, disabled: false,
             queryCount: 0, firstQueriedAt: null, lastQueriedAt: null, createdAt: Date.now()
           };
