@@ -221,7 +221,19 @@
     }
     function safeUrl(u){
       var t = String(u || "").trim();
+      if (!t) return "";
       if (/^https?:\/\//i.test(t)) return t;
+      if (/^\/\//.test(t)) return "https:" + t;
+      // 其他協定（javascript:、data: 等）一律不接受
+      if (/^[a-z][a-z0-9+.-]*:/i.test(t)) return "";
+      // 沒有協定的裸網址（如 google.com、www.example.com/path）自動補 https://
+      if (/\s/.test(t)) return "";
+      if (/^[^\s\/:?#]+\.[^\s\/:?#]+/.test(t)){
+        try {
+          var parsed = new URL("https://" + t);
+          if (parsed.hostname && parsed.hostname.indexOf(".") >= 0) return parsed.href;
+        } catch (e) {}
+      }
       return "";
     }
     function cardStatus(card, now){
@@ -708,9 +720,17 @@
         html += '<div class="fields">';
         html += deliveryFieldHtml("帳號", delivery.account);
         html += deliveryFieldHtml("密碼", delivery.password);
-        var vurl = safeUrl(delivery.verifyUrl);
-        if (vurl){
-          html += '<div class="field"><p>驗證碼網址</p><a class="verify-link" href="' + esc(vurl) + '" target="_blank" rel="noreferrer">打開驗證碼網址 ↗</a></div>';
+        var rawVerify = String(delivery.verifyUrl || "").trim();
+        if (rawVerify){
+          var vurl = safeUrl(rawVerify);
+          if (vurl){
+            html += '<div class="field"><p>驗證碼網址</p>' +
+              '<div class="field-row"><span class="mono">' + esc(vurl) + '</span>' +
+              '<button type="button" class="copy-btn" data-copy="' + esc(vurl) + '" data-label="複製網址">複製網址</button></div>' +
+              '<a class="verify-link" style="margin-top:.5rem" href="' + esc(vurl) + '" target="_blank" rel="noreferrer">打開驗證碼網址 ↗</a></div>';
+          } else {
+            html += deliveryFieldHtml("驗證碼網址", rawVerify);
+          }
         }
         if ((delivery.extraFields || "").trim()){
           delivery.extraFields.split(/\r?\n/).filter(function(l){ return l.trim(); }).forEach(function(line){
@@ -956,7 +976,7 @@
         '<div><label class="a-label" for="inv-product-name">商品名稱（顯示給買家）</label><input id="inv-product-name" class="a-input" value="' + esc(f.productName) + '" /></div>' +
         '<div><label class="a-label" for="inv-account">帳號 *</label><input id="inv-account" class="a-input" autocomplete="off" value="' + esc(f.account) + '" /></div>' +
         '<div><label class="a-label" for="inv-password">密碼 *</label><input id="inv-password" class="a-input" autocomplete="off" value="' + esc(f.password) + '" /></div>' +
-        '<div class="span2"><label class="a-label" for="inv-verify">驗證碼網址 / 領取連結（選填）</label><input id="inv-verify" class="a-input" placeholder="https://…" autocomplete="off" value="' + esc(f.verifyUrl) + '" /></div>' +
+        '<div class="span2"><label class="a-label" for="inv-verify">驗證碼網址 / 領取連結（選填）</label><input id="inv-verify" class="a-input" placeholder="https://… 或直接填 google.com（自動補 https://）" autocomplete="off" value="' + esc(f.verifyUrl) + '" /></div>' +
         '<div class="span2"><label class="a-label" for="inv-extra">額外欄位（選填，一行一個，格式：欄位名：內容）</label><textarea id="inv-extra" class="a-input" rows="2">' + esc(f.extraFields) + '</textarea></div>' +
         '<div class="span2"><label class="a-label" for="inv-instructions">使用說明（選填，留空則用網站設定的預設說明）</label><textarea id="inv-instructions" class="a-input" rows="2">' + esc(f.instructions) + '</textarea></div>' +
         '</div>' +
@@ -1016,7 +1036,7 @@
           productId: f.productId ? Number(f.productId) : null,
           productName: f.productName.trim(),
           account: f.account.trim(), password: f.password,
-          verifyUrl: f.verifyUrl.trim(), extraFields: f.extraFields, instructions: f.instructions
+          verifyUrl: safeUrl(f.verifyUrl.trim()) || f.verifyUrl.trim(), extraFields: f.extraFields, instructions: f.instructions
         };
         if (adminState.invEditId != null){
           var it = DB.inventory.find(function(x){ return x.id === adminState.invEditId; });
@@ -1055,7 +1075,7 @@
           if (!account || !password){ skipped++; return; }
           DB.inventory.push({
             id: DB.seq.inventory++, productId: pid, productName: name || pName,
-            account: account, password: password, verifyUrl: verifyUrl,
+            account: account, password: password, verifyUrl: safeUrl(verifyUrl) || verifyUrl,
             extraFields: extra, instructions: "", boundCardId: null, createdAt: Date.now()
           });
           imported++;
