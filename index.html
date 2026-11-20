@@ -101,22 +101,20 @@
       .gate-back{ margin-top:1rem; width:100%; border:none; background:none; padding:.5rem .75rem; font-size:.875rem; color:var(--a-dim); }
       .admin-page{ min-height:100vh; background:var(--a-bg); }
       .admin-head{ background:var(--a-head); color:#fff; }
-      .admin-head-in{ max-width:64rem; margin:0 auto; padding:.875rem 1rem 0; }
-      .admin-head-row{ display:flex; flex-wrap:wrap; align-items:center; gap:.5rem; }
-      .admin-title{ flex:1; min-width:0; }
+      .admin-head-in{ max-width:64rem; margin:0 auto; padding:1rem 1rem 0; }
+      .admin-head-row{ display:flex; flex-wrap:nowrap; align-items:center; gap:.75rem; }
+      .admin-title{ flex:1 1 auto; min-width:0; }
       .admin-title p{ margin:0; }
-      .admin-title .t1{ font-size:1rem; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-      .admin-title .t2{ font-size:.75rem; color:var(--a-head-dim); }
-      .head-btn{ border:1px solid var(--a-head-line); border-radius:.5rem; background:transparent; padding:.5rem .75rem; font-size:.875rem; color:#cfe4de; }
-      .admin-nav{ display:flex; gap:.25rem; overflow-x:auto; padding:.75rem 0; scrollbar-width:none; }
+      .admin-title .t1{ font-size:1.0625rem; font-weight:700; line-height:1.3; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+      .admin-title .t2{ font-size:.75rem; line-height:1.4; color:var(--a-head-dim); margin-top:.125rem; }
+      .admin-actions{ display:flex; gap:.5rem; flex-shrink:0; align-items:center; }
+      .head-btn{ border:1px solid var(--a-head-line); border-radius:.5rem; background:transparent; padding:.5rem .875rem; font-size:.875rem; line-height:1.2; color:#cfe4de; white-space:nowrap; flex-shrink:0; }
+      .admin-nav{ display:flex; flex-wrap:nowrap; gap:.375rem; overflow-x:auto; overflow-y:hidden; padding:.875rem 0 .875rem; scrollbar-width:none; -webkit-overflow-scrolling:touch; }
       .admin-nav::-webkit-scrollbar{ display:none; }
-      .tab-btn{ white-space:nowrap; border:none; border-radius:.5rem; padding:.5rem .875rem; font-size:.875rem; font-weight:600; background:transparent; color:#cfe4de; }
+      .tab-btn{ flex:0 0 auto; white-space:nowrap; border:none; border-radius:.5rem; padding:.5625rem .9375rem; font-size:.875rem; font-weight:600; line-height:1.2; background:transparent; color:#cfe4de; }
       .tab-btn:hover{ background:#1d443c; }
       .tab-btn.on{ background:#fff; color:var(--a-head); }
       .admin-main{ max-width:64rem; margin:0 auto; padding:1.25rem 1rem 3rem; }
-      .static-warn{ border:2px solid #d9a514; background:#fff8dd; border-radius:1rem; padding:1rem 1.25rem; margin-bottom:1.25rem; }
-      .static-warn h2{ margin:0; font-size:1rem; font-weight:800; color:#7a5b00; }
-      .static-warn p{ margin:.5rem 0 0; font-size:.875rem; line-height:1.8; color:#6d5a10; }
       .stat-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:.75rem; }
       @media (min-width:720px){ .stat-grid{ grid-template-columns:repeat(4,1fr); } }
       .stat{ border:1px solid var(--a-border); background:#fff; border-radius:1rem; padding:1rem; }
@@ -175,7 +173,7 @@
       .a-input,.code-input{ min-width:0; width:100%; }
       .row-card,.panel,.card{ overflow:hidden; }
       .row-title,.mono{ overflow-wrap:anywhere; word-break:break-word; }
-      .admin-nav{ flex-wrap:wrap; overflow-x:visible; }
+      .admin-nav{ flex-wrap:nowrap; overflow-x:auto; }
       .btn-row{ width:100%; }
       .btn-row > *{ min-width:0; }
       .field-row{ flex-wrap:wrap; }
@@ -193,7 +191,14 @@
         .hero h1{ font-size:28px; }
         .card{ padding:1rem; border-radius:1rem; }
         .admin-main{ padding:1rem .75rem 2.5rem; }
-        .admin-head-in{ padding:.75rem .75rem 0; }
+        .admin-head-in{ padding:.875rem .75rem 0; }
+        .admin-head-row{ flex-wrap:wrap; gap:.625rem .75rem; }
+        .admin-title{ flex:1 1 100%; }
+        .admin-title .t1{ white-space:normal; overflow:visible; text-overflow:clip; }
+        .admin-actions{ flex:1 1 100%; display:flex; gap:.5rem; }
+        .admin-actions .head-btn{ flex:1 1 0; text-align:center; padding:.5625rem .5rem; }
+        .admin-nav{ gap:.375rem; padding:.75rem 0 .75rem; margin:0 -.75rem; padding-left:.75rem; padding-right:.75rem; }
+        .tab-btn{ padding:.5625rem .875rem; }
         .panel{ padding:.875rem; }
         .row-card{ padding:.75rem; }
         .stat .sv{ font-size:1.5rem; }
@@ -617,22 +622,15 @@
     function lookupLocal(rawCode){
       var code = String(rawCode || "").trim().toUpperCase();
       var now = Date.now();
-      function log(success, reason){
-        DB.logs.unshift({ id: DB.seq.log++, codeMasked: maskCode(code), success: success, reason: reason, createdAt: now });
-        if (DB.logs.length > 500) DB.logs.length = 500;
-      }
       var card = null;
       for (var i = 0; i < DB.cards.length; i++){ if (DB.cards[i].code === code){ card = DB.cards[i]; break; } }
       if (!card){
-        log(false, "查無此卡密"); saveDb();
         return { ok: false, message: "查無此卡密，請核對字元後再試一次。" };
       }
       if (card.disabled){
-        log(false, "卡密已停用"); saveDb();
         return { ok: false, message: "這張卡密已被停用，請聯繫發卡方處理。" };
       }
       if (card.expiresAt != null && card.expiresAt < now){
-        log(false, "卡密已過期"); saveDb();
         return { ok: false, message: "這張卡密已超過有效期限，請聯繫發卡方處理。" };
       }
       var inv = null;
@@ -646,10 +644,10 @@
         }
       }
       if (!inv){
-        log(false, "尚未備貨"); saveDb();
+        saveDb();
         return { ok: false, message: "這張卡密尚未備妥交付資料，請稍後再試或聯繫發卡方。" };
       }
-      log(true, "查詢成功"); saveDb();
+      saveDb();
       return {
         ok: true,
         delivery: {
@@ -663,10 +661,6 @@
       };
     }
 
-    function logLookup(code, success, reason){
-      DB.logs.unshift({ id: DB.seq.log++, codeMasked: maskCode(code), success: success, reason: reason, createdAt: Date.now() });
-      if (DB.logs.length > 500) DB.logs.length = 500;
-    }
     function invById(id){
       if (id == null) return null;
       return DB.inventory.find(function(x){ return x.id === id; }) || null;
@@ -928,22 +922,21 @@
       try { DB = loadDb(); } catch (e) {}
       var app = document.getElementById("app");
       if (!isLoggedIn()){ renderGate(app); return; }
+      if (adminState.tab === "logs") adminState.tab = "overview";
       var s = DB.settings;
       var tabs = [
         ["overview", "總覽"], ["inventory", "庫存"], ["cards", "卡密"],
-        ["products", "商品"], ["publish", "發布・同步"], ["settings", "網站設定"], ["logs", "查詢紀錄"]
+        ["products", "商品"], ["publish", "發布・同步"], ["settings", "網站設定"]
       ];
       var html = '<div class="admin-page"><header class="admin-head"><div class="admin-head-in">' +
         '<div class="admin-head-row"><div class="admin-title"><p class="t1">' + esc(s.shopName) + '・管理後台</p><p class="t2">發貨庫存與卡密管理</p></div>' +
-        '<button type="button" class="head-btn" id="to-front">前台預覽</button>' +
-        '<button type="button" class="head-btn" id="logout-btn">登出</button></div>' +
+        '<div class="admin-actions"><button type="button" class="head-btn" id="to-front">前台預覽</button>' +
+        '<button type="button" class="head-btn" id="logout-btn">登出</button></div></div>' +
         '<nav class="admin-nav" aria-label="後台分頁">' +
         tabs.map(function(t){
           return '<button type="button" class="tab-btn' + (adminState.tab === t[0] ? " on" : "") + '" data-tab="' + t[0] + '"' + (adminState.tab === t[0] ? ' aria-current="page"' : "") + '>' + t[1] + '</button>';
         }).join("") +
         '</nav></div></header><main class="admin-main">' +
-        '<div class="static-warn"><h2>⚠ Pages 加密同步版・運作方式（請先看）</h2>' +
-        '<p>前台查詢時會即時讀取 GitHub 儲存庫裡的加密資料檔 <span class="mono">data.json</span>（先抓 raw.githubusercontent.com 上的最新版，抓不到再抓同目錄檔案）。資料檔裡<strong>只有密文與卡密雜湊</strong>，每筆帳密用「該筆卡密本身」加密，任何人下載都看不到明文。站長在後台新增或修改庫存、卡密、網站設定後，系統會<strong>自動把最新加密版 data.json 同步到 GitHub</strong>（需先在「發布・同步」設定權杖）；未設定權杖時，改完資料要到「發布・同步」手動下載 data.json 並上傳覆蓋，客人端才會更新。後台裡的明文庫存只存在站長這台裝置、這個瀏覽器中，不會寫進任何上傳內容。</p></div>' +
         '<div class="sync-bar" id="sync-bar">' + syncBarHtml() + '</div>' +
         '<div id="tab-body">' + tabHtml() + '</div>' +
         '</main></div>';
@@ -1000,7 +993,6 @@
         case "products": return productsHtml();
         case "publish": return publishHtml();
         case "settings": return settingsHtml();
-        case "logs": return logsHtml();
         default: return overviewHtml();
       }
     }
@@ -1654,22 +1646,6 @@
           renderAdmin();
         });
       });
-    }
-
-    /* ---- 查詢紀錄 ---- */
-    function logsHtml(){
-      var html = '<section aria-label="查詢紀錄"><div style="display:flex;flex-direction:column;gap:.5rem">';
-      if (!DB.logs.length){
-        html += '<p class="empty">尚無查詢紀錄。（紀錄只保存在查詢當下那台裝置的瀏覽器裡。）</p>';
-      }
-      DB.logs.slice(0, 100).forEach(function(l){
-        html += '<div class="log-row"><span class="pill ' + (l.success ? "pill-ok" : "pill-fail") + '">' + (l.success ? "成功" : "失敗") + '</span>' +
-          '<span class="mono" style="font-size:.875rem">' + esc(l.codeMasked) + '</span>' +
-          '<span style="font-size:.875rem;color:var(--a-dim)">' + esc(l.reason) + '</span>' +
-          '<span class="lt">' + fmtTime(l.createdAt) + '</span></div>';
-      });
-      html += '</div></section>';
-      return html;
     }
 
     /* ================= 啟動 ================= */
