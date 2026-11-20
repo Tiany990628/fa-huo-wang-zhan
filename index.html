@@ -1,0 +1,1466 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light" />
+    <link rel="icon" href="data:," />
+    <title>雲端發貨小舖・帳號領取（Pages 靜態版）</title>
+    <style>
+      :root{
+        --bg:#f2f4f3; --surface:#ffffff; --text:#1f2a28; --dim:#6b7a76;
+        --border:#e2e8e5; --accent:#0e7c6b; --accent-dark:#0a5f52;
+        --notice-bg:#fbf7e8; --notice-text:#6d6238; --notice-border:#eee3bd;
+        --err-bg:#fdf0ee; --err-border:#f0c9c2; --err-text:#a33327;
+        --ok-bg:#e9f6f1; --ok-border:#bfe3d8; --ok-text:#0d6e5c;
+        --field-bg:#f7f9f8;
+        --a-bg:#e9edeb; --a-head:#14332e; --a-head-dim:#9fc4ba; --a-head-line:#3d5f58;
+        --a-border:#dde4e1; --a-input-border:#c9d4d0; --a-dim:#6b7a76; --a-text:#1f2a28;
+      }
+      *{ box-sizing:border-box; }
+      html,body{ margin:0; padding:0; }
+      body{
+        font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang TC","PingFang SC","Microsoft JhengHei","Noto Sans TC",sans-serif;
+        background:var(--bg); color:var(--text); -webkit-font-smoothing:antialiased;
+      }
+      button,[role="button"],select,summary,input:not([type="checkbox"],[type="radio"]),textarea,a.btn{ min-height:2.25rem; }
+      button{ font-family:inherit; cursor:pointer; }
+      input,textarea,select{ font-family:inherit; }
+      .mono{ font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; }
+      img{ max-width:100%; }
+
+      /* ---------- Front ---------- */
+      .front-wrap{ max-width:36rem; margin:0 auto; padding:0 1rem 2.5rem; }
+      .front-head{ display:flex; align-items:center; gap:.75rem; border-bottom:1px solid var(--border); padding:1rem 0; }
+      .shop-badge{ width:2.75rem; height:2.75rem; border-radius:.75rem; background:var(--accent); color:#fff; display:flex; align-items:center; justify-content:center; font-size:1.25rem; font-weight:700; flex-shrink:0; }
+      .shop-name{ font-size:1.125rem; font-weight:700; line-height:1.25; margin:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+      .shop-sub{ font-size:.75rem; color:var(--dim); margin:0; }
+      .head-tag{ font-size:.875rem; color:var(--dim); margin-left:auto; white-space:nowrap; }
+      @media (max-width:419px){ .head-tag{ display:none; } }
+      .hero{ padding-top:2rem; }
+      .kicker{ font-size:13px; font-weight:700; letter-spacing:.22em; color:var(--accent); margin:0; }
+      .hero h1{ font-size:34px; font-weight:800; line-height:1.25; margin:.75rem 0 0; }
+      .hero p.lead{ margin:.75rem 0 0; font-size:15px; line-height:1.7; color:var(--dim); }
+      .steps{ list-style:none; display:flex; flex-wrap:wrap; gap:.5rem 1.25rem; margin:1.25rem 0 0; padding:0; font-size:.875rem; color:var(--dim); }
+      .steps li{ display:flex; align-items:center; gap:.5rem; }
+      .step-n{ width:1.5rem; height:1.5rem; border-radius:999px; border:1px solid var(--accent); color:var(--accent); display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; }
+      .notice{ margin-top:1.5rem; border:1px solid var(--notice-border); background:var(--notice-bg); border-radius:1rem; padding:1rem 1.25rem; }
+      .notice h2{ font-size:15px; font-weight:700; color:var(--notice-text); margin:0; }
+      .notice p{ margin:.5rem 0 0; font-size:15px; line-height:1.7; color:var(--notice-text); white-space:pre-wrap; }
+      .card{ margin-top:1.5rem; background:var(--surface); border:1px solid var(--border); border-radius:1.5rem; padding:1.25rem; box-shadow:0 2px 16px rgba(20,40,36,.05); }
+      .lookup-head{ display:flex; align-items:center; gap:.75rem; }
+      .lookup-ico{ width:3rem; height:3rem; border-radius:1rem; background:#e3f0ec; color:var(--accent); display:flex; align-items:center; justify-content:center; font-size:1.5rem; flex-shrink:0; }
+      .lookup-head h2{ font-size:1.25rem; font-weight:700; margin:0; }
+      .lookup-head p{ font-size:.875rem; color:var(--dim); margin:0; }
+      .fld-label{ display:block; font-size:15px; font-weight:600; margin-top:1.25rem; }
+      .code-input{ margin-top:.5rem; width:100%; border:1px solid var(--border); border-radius:.75rem; background:#fff; padding:.875rem 1rem; font-size:1rem; color:var(--text); outline:none; }
+      .code-input:focus{ border-color:var(--accent); }
+      .code-input::placeholder{ color:#9db3ad; font-family:inherit; }
+      .hint{ margin:.5rem 0 0; font-size:.875rem; color:var(--dim); }
+      .hint.err{ color:#c0392b; }
+      .primary-btn{ margin-top:1rem; width:100%; border:none; border-radius:.75rem; padding:.875rem; font-size:1rem; font-weight:700; color:#fff; background:var(--accent); }
+      .primary-btn:disabled{ opacity:.6; }
+      .alert-err{ margin-top:1rem; border:1px solid var(--err-border); background:var(--err-bg); border-radius:.75rem; padding:.75rem 1rem; font-size:15px; color:var(--err-text); }
+      .alert-ok{ margin-top:1rem; border:1px solid var(--ok-border); background:var(--ok-bg); border-radius:.75rem; padding:.75rem 1rem; font-size:15px; color:var(--ok-text); }
+      .dot-note{ margin-top:1rem; display:flex; align-items:center; justify-content:center; gap:.5rem; text-align:center; font-size:13px; color:var(--dim); }
+      .dot{ width:.375rem; height:.375rem; border-radius:999px; background:var(--accent); flex-shrink:0; }
+      .ready-head{ display:flex; align-items:flex-start; justify-content:space-between; gap:.75rem; }
+      .ready-head h2{ font-size:22px; font-weight:700; margin:.375rem 0 0; }
+      .ready-prod{ margin:.25rem 0 0; font-size:.875rem; color:var(--dim); }
+      .clear-btn{ flex-shrink:0; border:none; background:none; padding:.5rem; font-size:.875rem; color:var(--dim); }
+      .fields{ margin-top:1.25rem; display:flex; flex-direction:column; gap:1rem; }
+      .field p{ margin:0 0 .375rem; font-size:.875rem; color:var(--dim); }
+      .field-row{ display:flex; align-items:center; gap:.5rem; border:1px solid var(--border); background:var(--field-bg); border-radius:.75rem; padding:.625rem .875rem; }
+      .field-row span{ flex:1; min-width:0; overflow-wrap:anywhere; font-size:15px; }
+      .copy-btn{ flex-shrink:0; border:1px solid var(--border); background:#fff; border-radius:.5rem; padding:.5rem .75rem; font-size:.875rem; font-weight:600; color:var(--accent); }
+      .copy-btn:active{ background:#eef6f3; }
+      .verify-link{ display:block; border:1px solid var(--ok-border); background:var(--ok-bg); border-radius:.75rem; padding:.875rem 1rem; text-align:center; font-size:1rem; font-weight:700; color:var(--accent); text-decoration:none; }
+      .extra-note{ border-radius:.75rem; background:var(--field-bg); padding:.75rem 1rem; font-size:15px; margin:0; }
+      .front-foot{ margin-top:2.5rem; border-top:1px solid var(--border); padding-top:1.25rem; text-align:center; font-size:13px; line-height:1.7; color:var(--dim); }
+      .front-foot p{ margin:0; }
+      .front-foot p + p{ margin-top:.25rem; }
+      .front-foot .foot-brand{ margin-top:1rem; }
+
+      /* ---------- Admin ---------- */
+      .gate-wrap{ min-height:100vh; background:var(--a-head); display:flex; align-items:center; justify-content:center; padding:2.5rem 1rem; }
+      .gate-card{ width:100%; max-width:24rem; background:#fff; border-radius:1rem; padding:1.5rem; box-shadow:0 20px 40px rgba(0,0,0,.25); }
+      .gate-card .kicker{ color:var(--accent); }
+      .gate-card h1{ font-size:1.5rem; font-weight:800; color:var(--a-text); margin:.5rem 0 0; }
+      .gate-card .desc{ margin:.5rem 0 0; font-size:.875rem; line-height:1.7; color:var(--a-dim); }
+      .a-label{ display:block; margin-bottom:.25rem; font-size:.875rem; font-weight:600; color:#33413d; }
+      .a-input{ width:100%; border:1px solid var(--a-input-border); border-radius:.5rem; background:#fff; padding:.625rem .75rem; font-size:15px; color:var(--a-text); outline:none; }
+      .a-input:focus{ border-color:var(--accent); }
+      .a-btn{ border:none; border-radius:.5rem; background:var(--accent); padding:.625rem 1rem; font-size:.875rem; font-weight:700; color:#fff; }
+      .a-btn:disabled{ opacity:.6; }
+      .a-btn-ghost{ border:1px solid var(--a-input-border); border-radius:.5rem; background:#fff; padding:.5rem .75rem; font-size:.875rem; font-weight:600; color:#33413d; }
+      .a-btn-ghost:disabled{ opacity:.6; }
+      .a-btn-danger{ border:1px solid #e5b6ae; border-radius:.5rem; background:#fff; padding:.5rem .75rem; font-size:.875rem; font-weight:600; color:#b03a2e; }
+      .a-btn-danger-solid{ border:none; border-radius:.5rem; background:#b03a2e; padding:.5rem .75rem; font-size:.875rem; font-weight:700; color:#fff; }
+      .form-err{ margin:.5rem 0 0; font-size:.875rem; color:#b03a2e; }
+      .form-ok{ margin:.5rem 0 0; font-size:.875rem; color:var(--ok-text); }
+      .gate-back{ margin-top:1rem; width:100%; border:none; background:none; padding:.5rem .75rem; font-size:.875rem; color:var(--a-dim); }
+      .admin-page{ min-height:100vh; background:var(--a-bg); }
+      .admin-head{ background:var(--a-head); color:#fff; }
+      .admin-head-in{ max-width:64rem; margin:0 auto; padding:.875rem 1rem 0; }
+      .admin-head-row{ display:flex; flex-wrap:wrap; align-items:center; gap:.5rem; }
+      .admin-title{ flex:1; min-width:0; }
+      .admin-title p{ margin:0; }
+      .admin-title .t1{ font-size:1rem; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+      .admin-title .t2{ font-size:.75rem; color:var(--a-head-dim); }
+      .head-btn{ border:1px solid var(--a-head-line); border-radius:.5rem; background:transparent; padding:.5rem .75rem; font-size:.875rem; color:#cfe4de; }
+      .admin-nav{ display:flex; gap:.25rem; overflow-x:auto; padding:.75rem 0; scrollbar-width:none; }
+      .admin-nav::-webkit-scrollbar{ display:none; }
+      .tab-btn{ white-space:nowrap; border:none; border-radius:.5rem; padding:.5rem .875rem; font-size:.875rem; font-weight:600; background:transparent; color:#cfe4de; }
+      .tab-btn:hover{ background:#1d443c; }
+      .tab-btn.on{ background:#fff; color:var(--a-head); }
+      .admin-main{ max-width:64rem; margin:0 auto; padding:1.25rem 1rem 3rem; }
+      .static-warn{ border:2px solid #d9a514; background:#fff8dd; border-radius:1rem; padding:1rem 1.25rem; margin-bottom:1.25rem; }
+      .static-warn h2{ margin:0; font-size:1rem; font-weight:800; color:#7a5b00; }
+      .static-warn p{ margin:.5rem 0 0; font-size:.875rem; line-height:1.8; color:#6d5a10; }
+      .stat-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:.75rem; }
+      @media (min-width:720px){ .stat-grid{ grid-template-columns:repeat(4,1fr); } }
+      .stat{ border:1px solid var(--a-border); background:#fff; border-radius:1rem; padding:1rem; }
+      .stat p{ margin:0; }
+      .stat .sl{ font-size:13px; color:var(--a-dim); }
+      .stat .sv{ margin-top:.25rem; font-size:1.875rem; font-weight:800; color:var(--a-text); }
+      .panel{ border:1px solid var(--a-border); background:#fff; border-radius:1rem; padding:1rem; }
+      .panel h2{ margin:0; font-size:1rem; font-weight:700; color:var(--a-text); }
+      .panel .sub{ margin:.25rem 0 0; font-size:.875rem; line-height:1.7; color:var(--a-dim); }
+      .flow-note{ margin-top:1rem; border:1px solid var(--a-border); background:#fff; border-radius:1rem; padding:.875rem 1rem; font-size:.875rem; line-height:1.8; color:var(--a-dim); }
+      .grid2{ display:grid; gap:.75rem; margin-top:.75rem; }
+      @media (min-width:720px){ .grid2{ grid-template-columns:1fr 1fr; } .grid3{ grid-template-columns:1fr 1fr 1fr; } .span2{ grid-column:span 2; } }
+      .btn-row{ display:flex; flex-wrap:wrap; gap:.5rem; margin-top:.75rem; align-items:center; }
+      .list{ margin-top:1rem; display:flex; flex-direction:column; gap:.625rem; }
+      .empty{ border:1px dashed var(--a-input-border); background:#fff; border-radius:1rem; padding:1.5rem 1rem; text-align:center; font-size:.875rem; color:var(--a-dim); }
+      .row-card{ border:1px solid var(--a-border); background:#fff; border-radius:1rem; padding:.75rem 1rem; }
+      .row-top{ display:flex; flex-wrap:wrap; align-items:center; gap:.5rem; }
+      .row-main{ flex:1; min-width:0; }
+      .row-title{ font-weight:600; color:var(--a-text); margin:0; overflow-wrap:anywhere; }
+      .row-meta{ margin:.25rem 0 0; font-size:.875rem; line-height:1.7; color:var(--a-dim); }
+      .row-meta-sm{ margin:.375rem 0 0; font-size:13px; line-height:1.7; color:var(--a-dim); }
+      .pill{ border-radius:999px; padding:.25rem .625rem; font-size:.75rem; font-weight:700; white-space:nowrap; }
+      .pill-bound{ background:#fdeeda; color:#9a6a12; }
+      .pill-free{ background:var(--ok-bg); color:var(--ok-text); }
+      .pill-unused{ background:#eef1f0; color:#5c6d68; }
+      .pill-queried{ background:var(--ok-bg); color:var(--ok-text); }
+      .pill-expired{ background:#fdeeda; color:#9a6a12; }
+      .pill-disabled{ background:var(--err-bg); color:#b03a2e; }
+      .pill-ok{ background:var(--ok-bg); color:var(--ok-text); }
+      .pill-fail{ background:var(--err-bg); color:#b03a2e; }
+      .check-row{ margin-top:.75rem; display:flex; align-items:center; gap:.5rem; min-height:2.25rem; font-size:.875rem; color:#33413d; }
+      .check-row input{ width:1rem; height:1rem; }
+      .gen-box{ margin-top:1rem; border-radius:.75rem; background:#f4f7f6; padding:.75rem; }
+      .gen-box pre{ margin:.5rem 0 0; max-height:10rem; overflow-y:auto; white-space:pre-wrap; overflow-wrap:anywhere; font-size:.875rem; color:var(--a-text); }
+      .log-row{ display:flex; flex-wrap:wrap; align-items:center; gap:.5rem; border:1px solid var(--a-border); background:#fff; border-radius:.75rem; padding:.625rem 1rem; }
+      .log-row .lt{ margin-left:auto; font-size:13px; color:var(--a-dim); }
+      .expiry-row{ display:flex; flex-wrap:wrap; gap:.5rem; align-items:flex-end; margin-top:.5rem; }
+      .expiry-row .grow{ flex:1; min-width:180px; }
+      .sync-bar{ display:flex; flex-wrap:wrap; align-items:center; gap:.5rem .75rem; border:1px solid var(--a-border); background:#fff; border-radius:1rem; padding:.75rem 1rem; margin-bottom:1.25rem; font-size:.875rem; color:#33413d; }
+      .preview-box{ margin-top:1rem; border:1px solid #274d45; border-radius:.75rem; background:#0f2420; color:#cfe4de; padding:.75rem; max-height:22rem; overflow:auto; }
+      .preview-box pre{ margin:0; font-size:12px; line-height:1.6; white-space:pre-wrap; overflow-wrap:anywhere; font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; }
+      .pub-steps{ margin:.5rem 0 0; padding-left:1.25rem; font-size:.875rem; line-height:1.9; color:#33413d; }
+      .token-note{ margin:.5rem 0 0; font-size:.875rem; line-height:1.8; color:var(--a-dim); }
+      .loading{ padding:4rem 1rem; text-align:center; font-size:.875rem; color:var(--dim); }
+    </style>
+  </head>
+  <body>
+    <div id="app"><p class="loading">載入中…</p></div>
+
+    <script>
+    "use strict";
+    /* ================= 資料層（localStorage，本機本瀏覽器） ================= */
+    var DB_KEY = "fahuo-pages-db-v1";
+    var SESSION_KEY = "fahuo-pages-session-v1";
+
+    function defaultDb(){
+      return {
+        settings: {
+          shopName: "雲端發貨小舖",
+          announcement: "",
+          instructions: "",
+          supportContact: "",
+          adminPasswordHash: null
+        },
+        products: [],
+        inventory: [],
+        cards: [],
+        logs: [],
+        seq: { product: 1, inventory: 1, card: 1, log: 1 }
+      };
+    }
+    function loadDb(){
+      try {
+        var raw = localStorage.getItem(DB_KEY);
+        if (!raw) return defaultDb();
+        var db = JSON.parse(raw);
+        var d = defaultDb();
+        if (!db.settings) db.settings = d.settings;
+        ["products","inventory","cards","logs"].forEach(function(k){ if (!Array.isArray(db[k])) db[k] = []; });
+        if (!db.seq) db.seq = d.seq;
+        return db;
+      } catch (e) { return defaultDb(); }
+    }
+    function saveDb(){
+      try { localStorage.setItem(DB_KEY, JSON.stringify(DB)); } catch (e) {}
+    }
+    var DB = loadDb();
+
+    function esc(s){
+      return String(s == null ? "" : s)
+        .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+        .replace(/"/g,"&quot;").replace(/'/g,"&#39;");
+    }
+    function fmtTime(ts){
+      if (ts == null) return "—";
+      return new Date(ts).toLocaleString("zh-TW", { hour12: false });
+    }
+    function maskCode(code){
+      var c = String(code).replace(/\s/g,"");
+      if (c.length <= 4) return "****";
+      return c.slice(0,4) + "****" + c.slice(-2);
+    }
+    function safeUrl(u){
+      var t = String(u || "").trim();
+      if (/^https?:\/\//i.test(t)) return t;
+      return "";
+    }
+    function cardStatus(card, now){
+      if (card.disabled) return "disabled";
+      if (card.expiresAt != null && card.expiresAt < now) return "expired";
+      if (card.queryCount > 0) return "queried";
+      return "unused";
+    }
+    function genCode(){
+      var alphabet = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
+      function part(){
+        var s = "";
+        for (var i = 0; i < 4; i++){
+          var idx;
+          if (window.crypto && crypto.getRandomValues){
+            var arr = new Uint32Array(1); crypto.getRandomValues(arr); idx = arr[0] % alphabet.length;
+          } else { idx = Math.floor(Math.random() * alphabet.length); }
+          s += alphabet[idx];
+        }
+        return s;
+      }
+      return part() + "-" + part() + "-" + part() + "-" + part() + "-" + part();
+    }
+    function sha256Hex(str){
+      if (window.crypto && crypto.subtle && crypto.subtle.digest){
+        return crypto.subtle.digest("SHA-256", new TextEncoder().encode(str)).then(function(buf){
+          return Array.prototype.map.call(new Uint8Array(buf), function(b){
+            return ("0" + b.toString(16)).slice(-2);
+          }).join("");
+        });
+      }
+      // 極舊環境後備（不安全，僅避免頁面壞掉）
+      return Promise.resolve("plain::" + str);
+    }
+    function hashPassword(pw){ return sha256Hex("fahuo-admin::" + pw); }
+
+    /* ================= 加密（PBKDF2 + AES-GCM）與 data.json ================= */
+    var PBKDF2_ITER = 120000;
+    function b64encodeBytes(bytes){
+      var s = "";
+      for (var i = 0; i < bytes.length; i++) s += String.fromCharCode(bytes[i]);
+      return btoa(s);
+    }
+    function b64FromString(str){ return b64encodeBytes(new TextEncoder().encode(str)); }
+    function b64decodeBytes(str){
+      var s = atob(str);
+      var bytes = new Uint8Array(s.length);
+      for (var i = 0; i < s.length; i++) bytes[i] = s.charCodeAt(i);
+      return bytes;
+    }
+    function deriveKey(code, saltBytes){
+      return crypto.subtle.importKey("raw", new TextEncoder().encode(code), "PBKDF2", false, ["deriveKey"])
+        .then(function(base){
+          return crypto.subtle.deriveKey(
+            { name: "PBKDF2", salt: saltBytes, iterations: PBKDF2_ITER, hash: "SHA-256" },
+            base, { name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"]);
+        });
+    }
+    function encryptPayload(code, payloadObj){
+      var salt = crypto.getRandomValues(new Uint8Array(16));
+      var iv = crypto.getRandomValues(new Uint8Array(12));
+      return deriveKey(code, salt).then(function(key){
+        return crypto.subtle.encrypt({ name: "AES-GCM", iv: iv }, key,
+          new TextEncoder().encode(JSON.stringify(payloadObj)));
+      }).then(function(ct){
+        return { salt: b64encodeBytes(salt), iv: b64encodeBytes(iv), ciphertext: b64encodeBytes(new Uint8Array(ct)) };
+      });
+    }
+    function decryptPayload(code, entry){
+      try {
+        var salt = b64decodeBytes(entry.salt);
+        var iv = b64decodeBytes(entry.iv);
+        var ct = b64decodeBytes(entry.ciphertext);
+        return deriveKey(code, salt).then(function(key){
+          return crypto.subtle.decrypt({ name: "AES-GCM", iv: iv }, key, ct);
+        }).then(function(buf){
+          return JSON.parse(new TextDecoder().decode(buf));
+        }).catch(function(){ return null; });
+      } catch (e) { return Promise.resolve(null); }
+    }
+
+    /* 由目前全部卡密＋庫存產生加密版 data.json 內容 */
+    function buildDataJson(){
+      var claimed = {};
+      var entries = {};
+      var stocked = 0;
+      var chain = Promise.resolve();
+      DB.cards.forEach(function(card){
+        chain = chain.then(function(){
+          var inv = null;
+          if (card.inventoryId != null){
+            inv = DB.inventory.find(function(x){ return x.id === card.inventoryId; }) || null;
+          } else if (card.productId != null){
+            inv = DB.inventory.find(function(x){
+              return x.productId === card.productId && x.boundCardId == null && !claimed[x.id];
+            }) || null;
+            if (inv) claimed[inv.id] = true;
+          }
+          var payload;
+          if (inv){
+            stocked++;
+            payload = {
+              stocked: true,
+              productName: inv.productName || "",
+              account: inv.account, password: inv.password,
+              verifyUrl: inv.verifyUrl || "", extraFields: inv.extraFields || "",
+              instructions: inv.instructions || "",
+              disabled: !!card.disabled,
+              expiresAt: card.expiresAt != null ? card.expiresAt : null
+            };
+          } else {
+            payload = {
+              stocked: false, productName: "", account: "", password: "",
+              verifyUrl: "", extraFields: "", instructions: "",
+              disabled: !!card.disabled,
+              expiresAt: card.expiresAt != null ? card.expiresAt : null
+            };
+          }
+          return Promise.all([sha256Hex(card.code), encryptPayload(card.code, payload)])
+            .then(function(res){ entries[res[0]] = res[1]; });
+        });
+      });
+      return chain.then(function(){
+        var out = {
+          version: 1,
+          updatedAt: Date.now(),
+          site: {
+            shopName: DB.settings.shopName,
+            announcement: DB.settings.announcement,
+            instructions: DB.settings.instructions,
+            supportContact: DB.settings.supportContact
+          },
+          entries: entries
+        };
+        return { json: JSON.stringify(out, null, 2), count: DB.cards.length, stocked: stocked, builtAt: out.updatedAt };
+      });
+    }
+
+    /* ================= GitHub 同步設定（權杖只存本機 localStorage） ================= */
+    var GH_KEY = "fahuo-pages-gh-v1";
+    var GH_DEFAULTS = { token: "", owner: "Tiany990628", repo: "fa-huo-wang-zhan", branch: "main" };
+    function loadGh(){
+      try {
+        var raw = localStorage.getItem(GH_KEY);
+        if (!raw) return Object.assign({}, GH_DEFAULTS);
+        var g = JSON.parse(raw);
+        return {
+          token: typeof g.token === "string" ? g.token : "",
+          owner: (g.owner || GH_DEFAULTS.owner).trim(),
+          repo: (g.repo || GH_DEFAULTS.repo).trim(),
+          branch: (g.branch || GH_DEFAULTS.branch).trim()
+        };
+      } catch (e) { return Object.assign({}, GH_DEFAULTS); }
+    }
+    function saveGh(g){
+      try { localStorage.setItem(GH_KEY, JSON.stringify(g)); } catch (e) {}
+    }
+    function ghRawUrl(gh){
+      return "https://raw.githubusercontent.com/" + gh.owner + "/" + gh.repo + "/" + gh.branch + "/data.json";
+    }
+
+    var REMOTE = null;
+    function fetchDataJson(){
+      var bust = "?v=" + Date.now();
+      function tryUrl(u){
+        return fetch(u, { cache: "no-store" }).then(function(r){
+          if (!r.ok) throw new Error("HTTP " + r.status);
+          return r.json();
+        });
+      }
+      return tryUrl(ghRawUrl(loadGh()) + bust)
+        .catch(function(){ return tryUrl("./data.json" + bust); })
+        .catch(function(){ return tryUrl("data:application/json;base64,eyJlbnRyaWVzIjp7fSwic2l0ZSI6bnVsbCwidXBkYXRlZEF0IjowLCJ2ZXJzaW9uIjoxfQ==" + bust); })
+        .then(function(j){
+          if (j && typeof j === "object"){ REMOTE = j; return j; }
+          return null;
+        })
+        .catch(function(){ return null; });
+    }
+    function displaySettings(){
+      var s = DB.settings;
+      if (REMOTE && REMOTE.site){
+        return {
+          shopName: REMOTE.site.shopName || s.shopName,
+          announcement: REMOTE.site.announcement != null ? REMOTE.site.announcement : s.announcement,
+          instructions: REMOTE.site.instructions != null ? REMOTE.site.instructions : s.instructions,
+          supportContact: REMOTE.site.supportContact != null ? REMOTE.site.supportContact : s.supportContact
+        };
+      }
+      return s;
+    }
+
+    /* ================= GitHub 自動同步引擎 ================= */
+    var syncState = { status: "idle", time: null, message: "" };
+    try {
+      var lt = localStorage.getItem("fahuo-pages-last-sync");
+      if (lt) syncState.time = Number(lt) || null;
+    } catch (e) {}
+    var SYNC_TIMER = null;
+    function refreshSyncBarSafe(){
+      if (typeof refreshSyncBar === "function") refreshSyncBar();
+    }
+    function githubPutDataJson(jsonStr, gh){
+      var apiUrl = "https://api.github.com/repos/" + gh.owner + "/" + gh.repo + "/contents/data.json";
+      var headers = {
+        "Authorization": "Bearer " + gh.token,
+        "Accept": "application/vnd.github+json",
+        "X-GitHub-Api-Version": "2022-11-28"
+      };
+      return fetch(apiUrl + "?ref=" + encodeURIComponent(gh.branch), { headers: headers })
+        .then(function(r){
+          if (r.status === 404) return null;
+          if (!r.ok) throw new Error("讀取儲存庫失敗（HTTP " + r.status + "），請確認權杖權限與儲存庫設定");
+          return r.json();
+        })
+        .then(function(info){
+          var body = {
+            message: "Update encrypted delivery data (data.json)",
+            content: b64FromString(jsonStr),
+            branch: gh.branch
+          };
+          if (info && info.sha) body.sha = info.sha;
+          var putHeaders = Object.assign({ "Content-Type": "application/json" }, headers);
+          return fetch(apiUrl, { method: "PUT", headers: putHeaders, body: JSON.stringify(body) });
+        })
+        .then(function(r){
+          if (!r.ok){
+            return r.json().catch(function(){ return null; }).then(function(j){
+              var msg = (j && j.message) ? j.message : ("HTTP " + r.status);
+              throw new Error("GitHub 同步失敗：" + msg);
+            });
+          }
+          return r.json();
+        });
+    }
+    function syncNow(){
+      var gh = loadGh();
+      if (!gh.token){
+        syncState.status = "unconfigured"; syncState.message = "";
+        refreshSyncBarSafe();
+        return Promise.resolve(false);
+      }
+      syncState.status = "syncing"; syncState.message = "";
+      refreshSyncBarSafe();
+      return buildDataJson()
+        .then(function(built){ return githubPutDataJson(built.json, gh); })
+        .then(function(){
+          syncState.status = "ok"; syncState.time = Date.now(); syncState.message = "";
+          try { localStorage.setItem("fahuo-pages-last-sync", String(syncState.time)); } catch (e) {}
+          refreshSyncBarSafe();
+          return true;
+        })
+        .catch(function(err){
+          syncState.status = "error";
+          syncState.message = (err && err.message) ? err.message : "同步失敗，請檢查網路後重試";
+          refreshSyncBarSafe();
+          return false;
+        });
+    }
+    function scheduleSync(){
+      if (SYNC_TIMER) clearTimeout(SYNC_TIMER);
+      SYNC_TIMER = setTimeout(function(){ syncNow(); }, 800);
+    }
+
+    function copyText(text){
+      function done(){ return true; }
+      if (navigator.clipboard && navigator.clipboard.writeText){
+        return navigator.clipboard.writeText(text).then(done).catch(function(){ return fallback(); });
+      }
+      return Promise.resolve(fallback());
+      function fallback(){
+        try {
+          var ta = document.createElement("textarea");
+          ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+          document.body.appendChild(ta); ta.select();
+          document.execCommand("copy"); document.body.removeChild(ta);
+          return true;
+        } catch (e) { return false; }
+      }
+    }
+    function wireCopyButtons(root){
+      root.querySelectorAll("[data-copy]").forEach(function(btn){
+        btn.addEventListener("click", function(){
+          var text = btn.getAttribute("data-copy") || "";
+          var orig = btn.getAttribute("data-label") || btn.textContent;
+          copyText(text).then(function(ok){
+            if (ok){
+              btn.textContent = "已複製 ✓";
+              setTimeout(function(){ btn.textContent = orig; }, 1600);
+            }
+          });
+        });
+      });
+    }
+    function confirmable(btn, label, action){
+      // 兩段式刪除確認
+      if (btn.getAttribute("data-arm") === "1"){
+        action();
+        return;
+      }
+      btn.setAttribute("data-arm","1");
+      var wrap = document.createElement("span");
+      wrap.style.display = "inline-flex"; wrap.style.gap = ".375rem";
+      var yes = document.createElement("button");
+      yes.type = "button"; yes.className = "a-btn-danger-solid"; yes.textContent = "確認刪除";
+      yes.addEventListener("click", action);
+      var no = document.createElement("button");
+      no.type = "button"; no.className = "a-btn-ghost"; no.textContent = "取消";
+      no.addEventListener("click", function(){ render(); });
+      btn.replaceWith(wrap); wrap.appendChild(yes); wrap.appendChild(no);
+    }
+
+    /* ================= 路由 ================= */
+    function isAdminRoute(){
+      var h = window.location.hash;
+      return h.indexOf("#/admin") === 0 || h === "#admin";
+    }
+    window.addEventListener("hashchange", function(){ render(); });
+
+    function render(){
+      if (isAdminRoute()) renderAdmin();
+      else renderFront();
+      window.scrollTo(0, 0);
+    }
+
+    /* ================= 前台 ================= */
+    var frontState = { result: null, codeError: "", pending: false };
+
+    function lookupLocal(rawCode){
+      var code = String(rawCode || "").trim().toUpperCase();
+      var now = Date.now();
+      function log(success, reason){
+        DB.logs.unshift({ id: DB.seq.log++, codeMasked: maskCode(code), success: success, reason: reason, createdAt: now });
+        if (DB.logs.length > 500) DB.logs.length = 500;
+      }
+      var card = null;
+      for (var i = 0; i < DB.cards.length; i++){ if (DB.cards[i].code === code){ card = DB.cards[i]; break; } }
+      if (!card){
+        log(false, "查無此卡密"); saveDb();
+        return { ok: false, message: "查無此卡密，請核對字元後再試一次。" };
+      }
+      if (card.disabled){
+        log(false, "卡密已停用"); saveDb();
+        return { ok: false, message: "這張卡密已被停用，請聯繫發卡方處理。" };
+      }
+      if (card.expiresAt != null && card.expiresAt < now){
+        log(false, "卡密已過期"); saveDb();
+        return { ok: false, message: "這張卡密已超過有效期限，請聯繫發卡方處理。" };
+      }
+      var inv = null;
+      if (card.inventoryId != null){
+        inv = DB.inventory.find(function(x){ return x.id === card.inventoryId; }) || null;
+      } else if (card.productId != null){
+        inv = DB.inventory.find(function(x){ return x.productId === card.productId && x.boundCardId == null; }) || null;
+        if (inv){
+          inv.boundCardId = card.id;
+          card.inventoryId = inv.id;
+        }
+      }
+      if (!inv){
+        log(false, "尚未備貨"); saveDb();
+        return { ok: false, message: "這張卡密尚未備妥交付資料，請稍後再試或聯繫發卡方。" };
+      }
+      card.queryCount = (card.queryCount || 0) + 1;
+      if (card.firstQueriedAt == null) card.firstQueriedAt = now;
+      card.lastQueriedAt = now;
+      log(true, "查詢成功"); saveDb();
+      return {
+        ok: true,
+        delivery: {
+          productName: inv.productName || "",
+          account: inv.account,
+          password: inv.password,
+          verifyUrl: inv.verifyUrl || "",
+          extraFields: inv.extraFields || "",
+          instructions: inv.instructions || DB.settings.instructions || ""
+        }
+      };
+    }
+
+    function logLookup(code, success, reason){
+      DB.logs.unshift({ id: DB.seq.log++, codeMasked: maskCode(code), success: success, reason: reason, createdAt: Date.now() });
+      if (DB.logs.length > 500) DB.logs.length = 500;
+    }
+
+    /* 前台查詢：先查 GitHub 上的加密 data.json，查不到再查本地（同裝置）資料 */
+    function lookupCardAsync(rawCode){
+      var code = String(rawCode || "").trim().toUpperCase();
+      return fetchDataJson().then(function(remote){
+        if (remote && remote.entries){
+          return sha256Hex(code).then(function(hash){
+            var entry = remote.entries[hash];
+            if (!entry) return lookupLocal(code);
+            return decryptPayload(code, entry).then(function(payload){
+              if (!payload){
+                logLookup(code, false, "查無此卡密"); saveDb();
+                return { ok: false, message: "查無此卡密，請核對字元後再試一次。" };
+              }
+              if (payload.disabled){
+                logLookup(code, false, "卡密已停用"); saveDb();
+                return { ok: false, message: "這張卡密已被停用，請聯繫發卡方處理。" };
+              }
+              if (payload.expiresAt != null && payload.expiresAt < Date.now()){
+                logLookup(code, false, "卡密已過期"); saveDb();
+                return { ok: false, message: "這張卡密已超過有效期限，請聯繫發卡方處理。" };
+              }
+              if (!payload.stocked){
+                logLookup(code, false, "尚未備貨"); saveDb();
+                return { ok: false, message: "這張卡密尚未備妥交付資料，請稍後再試或聯繫發卡方。" };
+              }
+              logLookup(code, true, "查詢成功"); saveDb();
+              var siteIns = (remote.site && remote.site.instructions) || DB.settings.instructions || "";
+              return {
+                ok: true,
+                delivery: {
+                  productName: payload.productName || "",
+                  account: payload.account,
+                  password: payload.password,
+                  verifyUrl: payload.verifyUrl || "",
+                  extraFields: payload.extraFields || "",
+                  instructions: payload.instructions || siteIns
+                }
+              };
+            });
+          });
+        }
+        return lookupLocal(code);
+      }).catch(function(){ return lookupLocal(code); });
+    }
+
+    function deliveryFieldHtml(label, value){
+      return '<div class="field"><p>' + esc(label) + '</p>' +
+        '<div class="field-row"><span class="mono">' + esc(value) + '</span>' +
+        '<button type="button" class="copy-btn" data-copy="' + esc(value) + '" data-label="複製' + esc(label) + '">複製' + esc(label) + '</button></div></div>';
+    }
+
+    function renderFront(){
+      var s = displaySettings();
+      var app = document.getElementById("app");
+      var result = frontState.result;
+      var delivery = result && result.ok ? result.delivery : null;
+      var html = "";
+      html += '<div class="front-wrap">';
+      // Header
+      html += '<header class="front-head"><div class="shop-badge" aria-hidden="true">' + esc((s.shopName || "店").slice(0,1)) + '</div>' +
+        '<div style="min-width:0;flex:1"><p class="shop-name">' + esc(s.shopName) + '</p><p class="shop-sub">帳號交付</p></div>' +
+        '<p class="head-tag">你的帳號，憑卡領取</p></header>';
+      // Hero
+      html += '<section class="hero"><p class="kicker">ACCOUNT DELIVERY</p>' +
+        '<h1>領取你的帳號資料</h1>' +
+        '<p class="lead">輸入收到的卡密，即可查看對應帳號與驗證碼網址。</p>' +
+        '<ol class="steps">' +
+        ["輸入卡密","查看資料","登入使用"].map(function(label, i){
+          return '<li><span class="step-n">' + (i+1) + '</span>' + label + '</li>';
+        }).join("") + '</ol></section>';
+      // Announcement
+      if ((s.announcement || "").trim()){
+        html += '<section class="notice" aria-label="網站公告"><h2>網站公告</h2><p>' + esc(s.announcement) + '</p></section>';
+      }
+      // Lookup card
+      html += '<section class="card"><div class="lookup-head">' +
+        '<div class="lookup-ico" aria-hidden="true">⌘</div>' +
+        '<div><h2>卡密查詢</h2><p>每張卡密對應一個固定帳號</p></div></div>' +
+        '<form id="lookup-form"><label class="fld-label" for="card-code">你的卡密</label>' +
+        '<input id="card-code" class="code-input mono" placeholder="貼上或輸入完整卡密" autocomplete="off" autocapitalize="characters" />' +
+        (frontState.codeError
+          ? '<p class="hint err">' + esc(frontState.codeError) + '</p>'
+          : '<p class="hint">請核對字元，避免遺漏。</p>') +
+        '<button type="submit" class="primary-btn"' + (frontState.pending ? " disabled" : "") + '>' + (frontState.pending ? "查詢中…" : "查詢帳號 →") + '</button></form>';
+      if (result && !result.ok){
+        html += '<p class="alert-err" role="alert">' + esc(result.message) + '</p>';
+      }
+      if (result && result.ok){
+        html += '<p class="alert-ok">查詢成功，請妥善保存帳號資料。</p>';
+      }
+      html += '<p class="dot-note"><span class="dot" aria-hidden="true"></span>卡密有效期間內，可再次查詢同一份資料</p></section>';
+      // Delivery result
+      if (delivery){
+        html += '<section class="card"><div class="ready-head"><div>' +
+          '<p class="kicker" style="font-size:12px">READY TO USE</p>' +
+          '<h2>你的帳號資料</h2>' +
+          (delivery.productName ? '<p class="ready-prod">商品：' + esc(delivery.productName) + '</p>' : '') +
+          '</div><button type="button" class="clear-btn" id="clear-btn">清空資料</button></div>';
+        html += '<div class="fields">';
+        html += deliveryFieldHtml("帳號", delivery.account);
+        html += deliveryFieldHtml("密碼", delivery.password);
+        var vurl = safeUrl(delivery.verifyUrl);
+        if (vurl){
+          html += '<div class="field"><p>驗證碼網址</p><a class="verify-link" href="' + esc(vurl) + '" target="_blank" rel="noreferrer">打開驗證碼網址 ↗</a></div>';
+        }
+        if ((delivery.extraFields || "").trim()){
+          delivery.extraFields.split(/\r?\n/).filter(function(l){ return l.trim(); }).forEach(function(line){
+            var idx = line.search(/[：:]/);
+            if (idx > 0){
+              html += deliveryFieldHtml(line.slice(0, idx).trim(), line.slice(idx + 1).trim());
+            } else {
+              html += '<p class="extra-note">' + esc(line) + '</p>';
+            }
+          });
+        }
+        html += '</div>';
+        if ((delivery.instructions || "").trim()){
+          html += '<div class="notice" style="margin-top:1.25rem"><h2>使用說明</h2><p>' + esc(delivery.instructions) + '</p></div>';
+        }
+        html += '<p class="dot-note" style="margin-top:1rem">使用完成後可清空頁面。請勿將帳號、密碼或驗證碼網址分享給他人。</p>';
+        html += '</section>';
+      }
+      // Footer
+      html += '<footer class="front-foot"><p>請妥善保管卡密，持有卡密的人可以查看對應帳號資料。</p>' +
+        '<p>遇到卡密或帳號問題，' + ((s.supportContact || "").trim() ? '請聯繫客服：' + esc(s.supportContact) : '請聯繫發卡方處理') + '。</p>' +
+        '<p class="foot-brand">' + esc(s.shopName) + '・帳號領取</p></footer>';
+      html += '</div>';
+      app.innerHTML = html;
+
+      var form = document.getElementById("lookup-form");
+      form.addEventListener("submit", function(e){
+        e.preventDefault();
+        var input = document.getElementById("card-code");
+        var code = input.value.trim();
+        if (!code){ frontState.codeError = "請先輸入卡密"; renderFrontKeep(code); return; }
+        frontState.codeError = "";
+        frontState.pending = true;
+        renderFrontKeep(code);
+        lookupCardAsync(code).then(function(res){
+          frontState.pending = false;
+          frontState.result = res;
+          renderFront();
+          var inp2 = document.getElementById("card-code");
+          if (inp2) inp2.value = code;
+        });
+      });
+      var clearBtn = document.getElementById("clear-btn");
+      if (clearBtn){
+        clearBtn.addEventListener("click", function(){
+          frontState.result = null; frontState.codeError = "";
+          renderFront();
+        });
+      }
+      wireCopyButtons(app);
+    }
+    function renderFrontKeep(code){
+      renderFront();
+      var inp = document.getElementById("card-code");
+      if (inp) inp.value = code || "";
+    }
+
+    /* ================= 後台（#/admin 獨立入口） ================= */
+    var adminState = {
+      tab: "overview", pwError: "", cardSearch: "", generated: [], genError: "",
+      invEditId: null, invMsg: "", invError: "", importMsg: "",
+      prodEditId: null, prodName: "", prodNote: "", prodError: "",
+      setMsg: "", pwMsg: "", ghMsg: "",
+      pubJson: "", pubInfo: "", pubBusy: false
+    };
+    function emptyInvForm(){
+      return { productId: "", productName: "", account: "", password: "", verifyUrl: "", extraFields: "", instructions: "" };
+    }
+    function isLoggedIn(){
+      try { return sessionStorage.getItem(SESSION_KEY) === "yes" && !!DB.settings.adminPasswordHash; }
+      catch (e) { return false; }
+    }
+    function setLoggedIn(v){
+      try { if (v) sessionStorage.setItem(SESSION_KEY, "yes"); else sessionStorage.removeItem(SESSION_KEY); }
+      catch (e) {}
+    }
+    function afterMutation(){ saveDb(); scheduleSync(); }
+    function exitAdmin(){
+      if (window.location.hash) history.replaceState(null, "", window.location.pathname + window.location.search);
+      render();
+    }
+    function toLocalInput(ts){
+      if (!ts) return "";
+      var d = new Date(ts);
+      function p(n){ return ("0" + n).slice(-2); }
+      return d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate()) + "T" + p(d.getHours()) + ":" + p(d.getMinutes());
+    }
+    function productOptions(selected, emptyLabel){
+      var html = '<option value="">' + esc(emptyLabel) + '</option>';
+      DB.products.forEach(function(p){
+        html += '<option value="' + p.id + '"' + (String(selected) === String(p.id) ? " selected" : "") + '>' + esc(p.name) + '</option>';
+      });
+      return html;
+    }
+    function productNameById(id){
+      if (id == null) return "—";
+      var p = DB.products.find(function(x){ return x.id === id; });
+      return p ? p.name : "—";
+    }
+
+    /* ---- 同步狀態列 ---- */
+    function syncBarHtml(){
+      var gh = loadGh();
+      if (!gh.token){
+        return '<span class="pill pill-expired">GitHub 同步未設定</span><span>未設定權杖時，改完資料請到「發布・同步」分頁手動下載 data.json 上傳覆蓋。</span>';
+      }
+      if (syncState.status === "syncing"){
+        return '<span class="pill pill-queried">同步中…</span><span>正在把最新加密資料推送到 GitHub 儲存庫。</span>';
+      }
+      if (syncState.status === "ok"){
+        return '<span class="pill pill-ok">已同步</span><span>最近同步成功：' + fmtTime(syncState.time) + '，客人端重新查詢即可看到最新資料。</span>';
+      }
+      if (syncState.status === "error"){
+        return '<span class="pill pill-fail">同步失敗</span><span>' + esc(syncState.message) + '</span><button type="button" class="a-btn-ghost" data-sync-retry>重試同步</button>';
+      }
+      return '<span class="pill pill-unused">GitHub 同步待命</span><span>' + (syncState.time ? "最近同步：" + fmtTime(syncState.time) : "尚未同步過，新增或修改資料後會自動同步。") + '</span><button type="button" class="a-btn-ghost" data-sync-retry>立即同步</button>';
+    }
+    function wireSyncBar(){
+      document.querySelectorAll("[data-sync-retry]").forEach(function(b){
+        b.addEventListener("click", function(){ syncNow(); });
+      });
+    }
+    function refreshSyncBar(){
+      var el = document.getElementById("sync-bar");
+      if (el){ el.innerHTML = syncBarHtml(); wireSyncBar(); }
+      var st = document.getElementById("pub-sync-status");
+      if (st) st.innerHTML = syncBarHtml(), wireSyncBar();
+    }
+
+    function renderAdmin(){
+      var app = document.getElementById("app");
+      if (!isLoggedIn()){ renderGate(app); return; }
+      var s = DB.settings;
+      var tabs = [
+        ["overview", "總覽"], ["inventory", "庫存"], ["cards", "卡密"],
+        ["products", "商品"], ["publish", "發布・同步"], ["settings", "網站設定"], ["logs", "查詢紀錄"]
+      ];
+      var html = '<div class="admin-page"><header class="admin-head"><div class="admin-head-in">' +
+        '<div class="admin-head-row"><div class="admin-title"><p class="t1">' + esc(s.shopName) + '・管理後台</p><p class="t2">發貨庫存與卡密管理</p></div>' +
+        '<button type="button" class="head-btn" id="to-front">前台預覽</button>' +
+        '<button type="button" class="head-btn" id="logout-btn">登出</button></div>' +
+        '<nav class="admin-nav" aria-label="後台分頁">' +
+        tabs.map(function(t){
+          return '<button type="button" class="tab-btn' + (adminState.tab === t[0] ? " on" : "") + '" data-tab="' + t[0] + '"' + (adminState.tab === t[0] ? ' aria-current="page"' : "") + '>' + t[1] + '</button>';
+        }).join("") +
+        '</nav></div></header><main class="admin-main">' +
+        '<div class="static-warn"><h2>⚠ Pages 加密同步版・運作方式（請先看）</h2>' +
+        '<p>前台查詢時會即時讀取 GitHub 儲存庫裡的加密資料檔 <span class="mono">data.json</span>（先抓 raw.githubusercontent.com 上的最新版，抓不到再抓同目錄檔案）。資料檔裡<strong>只有密文與卡密雜湊</strong>，每筆帳密用「該筆卡密本身」加密，任何人下載都看不到明文。站長在後台新增或修改庫存、卡密、網站設定後，系統會<strong>自動把最新加密版 data.json 同步到 GitHub</strong>（需先在「發布・同步」設定權杖）；未設定權杖時，改完資料要到「發布・同步」手動下載 data.json 並上傳覆蓋，客人端才會更新。後台裡的明文庫存只存在站長這台裝置、這個瀏覽器中，不會寫進任何上傳內容。</p></div>' +
+        '<div class="sync-bar" id="sync-bar">' + syncBarHtml() + '</div>' +
+        '<div id="tab-body">' + tabHtml() + '</div>' +
+        '</main></div>';
+      app.innerHTML = html;
+      document.getElementById("to-front").addEventListener("click", exitAdmin);
+      document.getElementById("logout-btn").addEventListener("click", function(){ setLoggedIn(false); render(); });
+      app.querySelectorAll("[data-tab]").forEach(function(b){
+        b.addEventListener("click", function(){ adminState.tab = b.getAttribute("data-tab"); renderAdmin(); });
+      });
+      wireSyncBar();
+      wireTab();
+      wireCopyButtons(app);
+    }
+
+    function renderGate(app){
+      var needsSetup = !DB.settings.adminPasswordHash;
+      app.innerHTML = '<div class="gate-wrap"><div class="gate-card">' +
+        '<p class="kicker">ADMIN CONSOLE</p>' +
+        '<h1>' + (needsSetup ? "設定站長密碼" : "站長登入") + '</h1>' +
+        '<p class="desc">' + (needsSetup
+          ? "這是後台第一次開啟，請設定一組站長密碼，之後進後台都要用它登入。"
+          : "請輸入站長密碼進入管理後台。") + '</p>' +
+        '<form id="gate-form" style="margin-top:1.25rem">' +
+        '<label class="a-label" for="admin-password">站長密碼</label>' +
+        '<input id="admin-password" class="a-input" type="password" autocomplete="' + (needsSetup ? "new-password" : "current-password") + '" placeholder="至少 6 個字元" />' +
+        (adminState.pwError ? '<p class="form-err">' + esc(adminState.pwError) + '</p>' : "") +
+        '<button type="submit" class="a-btn" style="margin-top:1rem;width:100%">' + (needsSetup ? "設定密碼並進入後台" : "登入後台") + '</button></form>' +
+        '<p class="desc" style="margin-top:1rem">後台與前台完全分開，前台沒有任何後台入口。明文資料只存在這台裝置的瀏覽器；發布到 GitHub 的 data.json 只有密文。</p>' +
+        '<button type="button" class="gate-back" id="gate-back">← 回到領取頁</button>' +
+        '</div></div>';
+      document.getElementById("gate-back").addEventListener("click", exitAdmin);
+      document.getElementById("gate-form").addEventListener("submit", function(e){
+        e.preventDefault();
+        var pw = document.getElementById("admin-password").value;
+        if (pw.length < 6){ adminState.pwError = "密碼至少需要 6 個字元"; renderAdmin(); return; }
+        hashPassword(pw).then(function(h){
+          if (needsSetup){
+            DB.settings.adminPasswordHash = h; saveDb();
+            adminState.pwError = ""; setLoggedIn(true); render();
+          } else if (h === DB.settings.adminPasswordHash){
+            adminState.pwError = ""; setLoggedIn(true); render();
+          } else {
+            adminState.pwError = "密碼不正確，請再試一次"; renderAdmin();
+          }
+        });
+      });
+    }
+
+    /* ---- 分頁內容 ---- */
+    function tabHtml(){
+      switch (adminState.tab){
+        case "inventory": return inventoryHtml();
+        case "cards": return cardsHtml();
+        case "products": return productsHtml();
+        case "publish": return publishHtml();
+        case "settings": return settingsHtml();
+        case "logs": return logsHtml();
+        default: return overviewHtml();
+      }
+    }
+    function wireTab(){
+      switch (adminState.tab){
+        case "inventory": wireInventory(); break;
+        case "cards": wireCards(); break;
+        case "products": wireProducts(); break;
+        case "publish": wirePublish(); break;
+        case "settings": wireSettings(); break;
+      }
+    }
+
+    function overviewHtml(){
+      var now = Date.now();
+      var st = { unused: 0, queried: 0, expired: 0, disabled: 0 };
+      DB.cards.forEach(function(c){ st[cardStatus(c, now)]++; });
+      var avail = DB.inventory.filter(function(i){ return i.boundCardId == null; }).length;
+      var stats = [
+        ["卡密總數", DB.cards.length], ["未查詢", st.unused], ["已查詢", st.queried],
+        ["已過期", st.expired], ["已停用", st.disabled],
+        ["庫存總數", DB.inventory.length], ["未綁定庫存", avail], ["商品數", DB.products.length]
+      ];
+      return '<section aria-label="總覽統計"><div class="stat-grid">' +
+        stats.map(function(x){
+          return '<div class="stat"><p class="sl">' + x[0] + '</p><p class="sv">' + x[1] + '</p></div>';
+        }).join("") +
+        '</div><p class="flow-note">發貨流程：先在「商品」建立商品（可省略），到「庫存」新增或批次匯入你要交付的帳號資料，再到「卡密」批次產生卡密並綁定庫存或指定商品，把卡密發給買家。只要 GitHub 同步已設定，上述每次異動都會自動把最新加密版 data.json 推送到儲存庫，買家在任何裝置打開前台、輸入卡密即可領取。</p></section>';
+    }
+
+    /* ---- 庫存 ---- */
+    function inventoryHtml(){
+      var f = adminState.invForm || emptyInvForm();
+      var html = '<section aria-label="庫存管理">' +
+        '<form class="panel" id="inv-form"><h2>' + (adminState.invEditId != null ? "編輯交付內容" : "新增交付內容") + '</h2>' +
+        '<div class="grid2">' +
+        '<div><label class="a-label" for="inv-product">所屬商品（選填）</label><select id="inv-product" class="a-input">' + productOptions(f.productId, "不指定商品") + '</select></div>' +
+        '<div><label class="a-label" for="inv-product-name">商品名稱（顯示給買家）</label><input id="inv-product-name" class="a-input" value="' + esc(f.productName) + '" /></div>' +
+        '<div><label class="a-label" for="inv-account">帳號 *</label><input id="inv-account" class="a-input" autocomplete="off" value="' + esc(f.account) + '" /></div>' +
+        '<div><label class="a-label" for="inv-password">密碼 *</label><input id="inv-password" class="a-input" autocomplete="off" value="' + esc(f.password) + '" /></div>' +
+        '<div class="span2"><label class="a-label" for="inv-verify">驗證碼網址 / 領取連結（選填）</label><input id="inv-verify" class="a-input" placeholder="https://…" autocomplete="off" value="' + esc(f.verifyUrl) + '" /></div>' +
+        '<div class="span2"><label class="a-label" for="inv-extra">額外欄位（選填，一行一個，格式：欄位名：內容）</label><textarea id="inv-extra" class="a-input" rows="2">' + esc(f.extraFields) + '</textarea></div>' +
+        '<div class="span2"><label class="a-label" for="inv-instructions">使用說明（選填，留空則用網站設定的預設說明）</label><textarea id="inv-instructions" class="a-input" rows="2">' + esc(f.instructions) + '</textarea></div>' +
+        '</div>' +
+        (adminState.invError ? '<p class="form-err">' + esc(adminState.invError) + '</p>' : "") +
+        (adminState.invMsg ? '<p class="form-ok">' + esc(adminState.invMsg) + '</p>' : "") +
+        '<div class="btn-row"><button type="submit" class="a-btn">' + (adminState.invEditId != null ? "儲存修改" : "新增庫存") + '</button>' +
+        (adminState.invEditId != null ? '<button type="button" class="a-btn-ghost" id="inv-cancel">取消編輯</button>' : "") +
+        '</div></form>' +
+        '<div class="panel" style="margin-top:1rem"><h2>批次貼上匯入</h2>' +
+        '<p class="sub">一行一份，欄位用 | 分隔：商品名稱 | 帳號 | 密碼 | 驗證碼網址 | 額外欄位（後兩欄可省略）</p>' +
+        '<div class="grid2"><div><label class="a-label" for="import-product">統一指定商品（選填，行內有寫商品名稱時以行內為準）</label><select id="import-product" class="a-input">' + productOptions("", "不指定") + '</select></div>' +
+        '<div><label class="a-label" for="import-text">貼上匯入內容</label><textarea id="import-text" class="a-input mono" rows="5" placeholder="商品A | user1@example.com | pass123 | https://… | 到期日：2027-01-01"></textarea></div></div>' +
+        (adminState.importMsg ? '<p class="form-ok">' + esc(adminState.importMsg) + '</p>' : "") +
+        '<div class="btn-row"><button type="button" class="a-btn" id="import-btn">匯入庫存</button></div></div>' +
+        '<div class="list">';
+      if (DB.inventory.length === 0){
+        html += '<p class="empty">庫存是空的。用上方表單單筆新增，或用批次匯入貼上你合法持有的交付內容。</p>';
+      }
+      DB.inventory.slice().reverse().forEach(function(it){
+        html += '<div class="row-card"><div class="row-top"><p class="row-main row-title mono">' + esc(it.account) + '</p>' +
+          (it.boundCardId != null
+            ? '<span class="pill pill-bound">已綁定卡密</span>'
+            : '<span class="pill pill-free">未綁定</span>') +
+          '</div><p class="row-meta">' + esc(it.productName || "未指定商品") + '・密碼 ' + esc(it.password) + (it.verifyUrl ? '・附驗證碼網址' : "") + '</p>' +
+          '<div class="btn-row"><button type="button" class="a-btn-ghost" data-inv-edit="' + it.id + '">編輯</button>' +
+          (it.boundCardId == null ? '<button type="button" class="a-btn-danger" data-inv-del="' + it.id + '">刪除</button>' : "") +
+          '</div></div>';
+      });
+      html += '</div></section>';
+      return html;
+    }
+    function readInvForm(){
+      return {
+        productId: document.getElementById("inv-product").value,
+        productName: document.getElementById("inv-product-name").value,
+        account: document.getElementById("inv-account").value,
+        password: document.getElementById("inv-password").value,
+        verifyUrl: document.getElementById("inv-verify").value,
+        extraFields: document.getElementById("inv-extra").value,
+        instructions: document.getElementById("inv-instructions").value
+      };
+    }
+    function wireInventory(){
+      adminState.invForm = adminState.invForm || emptyInvForm();
+      var prodSel = document.getElementById("inv-product");
+      prodSel.addEventListener("change", function(){
+        var p = DB.products.find(function(x){ return String(x.id) === prodSel.value; });
+        if (p) document.getElementById("inv-product-name").value = p.name;
+      });
+      document.getElementById("inv-form").addEventListener("submit", function(e){
+        e.preventDefault();
+        var f = readInvForm();
+        adminState.invForm = f;
+        if (!f.account.trim()){ adminState.invError = "請輸入帳號"; adminState.invMsg = ""; renderAdmin(); return; }
+        if (!f.password){ adminState.invError = "請輸入密碼"; adminState.invMsg = ""; renderAdmin(); return; }
+        var values = {
+          productId: f.productId ? Number(f.productId) : null,
+          productName: f.productName.trim(),
+          account: f.account.trim(), password: f.password,
+          verifyUrl: f.verifyUrl.trim(), extraFields: f.extraFields, instructions: f.instructions
+        };
+        if (adminState.invEditId != null){
+          var it = DB.inventory.find(function(x){ return x.id === adminState.invEditId; });
+          if (it) Object.assign(it, values);
+          adminState.invMsg = "已儲存修改，並已觸發同步。";
+        } else {
+          DB.inventory.push(Object.assign({ id: DB.seq.inventory++, boundCardId: null, createdAt: Date.now() }, values));
+          adminState.invMsg = "已新增庫存，並已觸發同步。";
+        }
+        adminState.invEditId = null;
+        adminState.invForm = emptyInvForm();
+        adminState.invError = "";
+        afterMutation();
+        renderAdmin();
+      });
+      var cancel = document.getElementById("inv-cancel");
+      if (cancel) cancel.addEventListener("click", function(){
+        adminState.invEditId = null; adminState.invForm = emptyInvForm(); adminState.invError = ""; renderAdmin();
+      });
+      document.getElementById("import-btn").addEventListener("click", function(){
+        var text = document.getElementById("import-text").value;
+        var pidVal = document.getElementById("import-product").value;
+        var pid = pidVal ? Number(pidVal) : null;
+        var pName = "";
+        if (pid != null){
+          var pr = DB.products.find(function(x){ return x.id === pid; });
+          if (pr) pName = pr.name;
+        }
+        var imported = 0, skipped = 0;
+        text.split(/\r?\n/).forEach(function(line){
+          var t = line.trim();
+          if (!t) return;
+          var parts = t.split("|").map(function(x){ return x.trim(); });
+          var name = parts[0] || "", account = parts[1] || "", password = parts[2] || "",
+              verifyUrl = parts[3] || "", extra = parts[4] || "";
+          if (!account || !password){ skipped++; return; }
+          DB.inventory.push({
+            id: DB.seq.inventory++, productId: pid, productName: name || pName,
+            account: account, password: password, verifyUrl: verifyUrl,
+            extraFields: extra, instructions: "", boundCardId: null, createdAt: Date.now()
+          });
+          imported++;
+        });
+        adminState.importMsg = "已匯入 " + imported + " 筆，略過 " + skipped + " 筆格式不完整" + (imported ? "，並已觸發同步。" : "");
+        if (imported) afterMutation(); else saveDb();
+        renderAdmin();
+      });
+      document.querySelectorAll("[data-inv-edit]").forEach(function(b){
+        b.addEventListener("click", function(){
+          var it = DB.inventory.find(function(x){ return x.id === Number(b.getAttribute("data-inv-edit")); });
+          if (!it) return;
+          adminState.invEditId = it.id;
+          adminState.invForm = {
+            productId: it.productId != null ? String(it.productId) : "",
+            productName: it.productName || "", account: it.account, password: it.password,
+            verifyUrl: it.verifyUrl || "", extraFields: it.extraFields || "", instructions: it.instructions || ""
+          };
+          adminState.invError = ""; adminState.invMsg = "";
+          renderAdmin();
+          window.scrollTo(0, 0);
+        });
+      });
+      document.querySelectorAll("[data-inv-del]").forEach(function(b){
+        b.addEventListener("click", function(){
+          confirmable(b, "刪除", function(){
+            var id = Number(b.getAttribute("data-inv-del"));
+            DB.inventory = DB.inventory.filter(function(x){ return x.id !== id; });
+            afterMutation();
+            renderAdmin();
+          });
+        });
+      });
+    }
+
+    /* ---- 卡密 ---- */
+    var CARD_STATUS = {
+      unused: ["未查詢", "pill-unused"], queried: ["已查詢", "pill-queried"],
+      expired: ["已過期", "pill-expired"], disabled: ["已停用", "pill-disabled"]
+    };
+    function cardsHtml(){
+      var html = '<section aria-label="卡密管理">' +
+        '<form class="panel" id="gen-form"><h2>批次產生卡密</h2>' +
+        '<p class="sub">卡密為 20 字元隨機碼（分段顯示），每張卡密就是解密它那筆交付內容的鑰匙，請妥善發給買家、不要公開張貼。</p>' +
+        '<div class="grid2 grid3">' +
+        '<div><label class="a-label" for="gen-count">產生數量</label><input id="gen-count" class="a-input" type="number" value="10" min="1" max="200" /></div>' +
+        '<div><label class="a-label" for="gen-product">指定商品（選填）</label><select id="gen-product" class="a-input">' + productOptions("", "不指定") + '</select></div>' +
+        '<div><label class="a-label" for="gen-expiry">有效期限（選填）</label><input id="gen-expiry" class="a-input" type="datetime-local" /></div>' +
+        '</div>' +
+        '<label class="check-row"><input type="checkbox" id="gen-bind" checked />立即綁定未使用的庫存（庫存不足時，其餘卡密會在發布／查詢時自動配對同商品庫存）</label>' +
+        (adminState.genError ? '<p class="form-err">' + esc(adminState.genError) + '</p>' : "") +
+        '<div class="btn-row"><button type="submit" class="a-btn">產生卡密</button></div>';
+      if (adminState.generated.length){
+        html += '<div class="gen-box"><div class="row-top"><p class="row-main" style="font-size:.875rem;font-weight:600;color:#33413d">剛產生的 ' + adminState.generated.length + ' 張卡密（請複製保存）</p>' +
+          '<button type="button" class="a-btn-ghost" data-copy="' + esc(adminState.generated.join("\n")) + '" data-label="複製全部">複製全部</button></div>' +
+          '<pre class="mono">' + esc(adminState.generated.join("\n")) + '</pre></div>';
+      }
+      html += '</form>' +
+        '<div style="margin-top:1rem"><label class="a-label" for="card-search">搜尋卡密</label>' +
+        '<input id="card-search" class="a-input" placeholder="輸入卡密片段搜尋" autocomplete="off" value="' + esc(adminState.cardSearch) + '" /></div>' +
+        '<div class="list" id="cards-list">' + cardsListHtml() + '</div></section>';
+      return html;
+    }
+    function cardsListHtml(){
+      var q = adminState.cardSearch.trim().toUpperCase();
+      var now = Date.now();
+      var list = DB.cards.slice().reverse().filter(function(c){ return !q || c.code.indexOf(q) >= 0; }).slice(0, 300);
+      if (!list.length){
+        return '<p class="empty">' + (DB.cards.length ? "沒有符合搜尋的卡密。" : "尚無卡密，用上方表單批次產生。") + '</p>';
+      }
+      return list.map(function(c){
+        var st = CARD_STATUS[cardStatus(c, now)] || CARD_STATUS.unused;
+        return '<div class="row-card"><div class="row-top"><p class="row-main row-title mono">' + esc(c.code) + '</p>' +
+          '<span class="pill ' + st[1] + '">' + st[0] + '</span>' +
+          '<button type="button" class="copy-btn" data-copy="' + esc(c.code) + '" data-label="複製卡密">複製卡密</button></div>' +
+          '<p class="row-meta-sm">商品：' + esc(productNameById(c.productId)) + '・查詢 ' + (c.queryCount || 0) + ' 次<br />' +
+          '首次查詢：' + fmtTime(c.firstQueriedAt) + '・最近查詢：' + fmtTime(c.lastQueriedAt) + '<br />' +
+          '有效期限：' + (c.expiresAt ? fmtTime(c.expiresAt) : "不限") + '</p>' +
+          '<div class="expiry-row"><div class="grow"><label class="a-label" for="exp-' + c.id + '">修改有效期限</label>' +
+          '<input id="exp-' + c.id + '" class="a-input" type="datetime-local" value="' + toLocalInput(c.expiresAt) + '" /></div>' +
+          '<button type="button" class="a-btn-ghost" data-card-exp-save="' + c.id + '">儲存期限</button>' +
+          '<button type="button" class="a-btn-ghost" data-card-exp-clear="' + c.id + '">清除期限</button></div>' +
+          '<div class="btn-row"><button type="button" class="a-btn-ghost" data-card-toggle="' + c.id + '">' + (c.disabled ? "啟用" : "停用") + '</button>' +
+          '<button type="button" class="a-btn-danger" data-card-del="' + c.id + '">刪除</button></div></div>';
+      }).join("");
+    }
+    function wireCardsList(){
+      var wrap = document.getElementById("cards-list");
+      if (!wrap) return;
+      wireCopyButtons(wrap);
+      wrap.querySelectorAll("[data-card-toggle]").forEach(function(b){
+        b.addEventListener("click", function(){
+          var c = DB.cards.find(function(x){ return x.id === Number(b.getAttribute("data-card-toggle")); });
+          if (c){ c.disabled = !c.disabled; afterMutation(); }
+          refreshCardsList();
+        });
+      });
+      wrap.querySelectorAll("[data-card-del]").forEach(function(b){
+        b.addEventListener("click", function(){
+          confirmable(b, "刪除", function(){
+            var id = Number(b.getAttribute("data-card-del"));
+            DB.inventory.forEach(function(i){ if (i.boundCardId === id) i.boundCardId = null; });
+            DB.cards = DB.cards.filter(function(x){ return x.id !== id; });
+            afterMutation();
+            refreshCardsList();
+          });
+        });
+      });
+      wrap.querySelectorAll("[data-card-exp-save]").forEach(function(b){
+        b.addEventListener("click", function(){
+          var id = Number(b.getAttribute("data-card-exp-save"));
+          var input = document.getElementById("exp-" + id);
+          var c = DB.cards.find(function(x){ return x.id === id; });
+          if (c && input){
+            c.expiresAt = input.value ? new Date(input.value).getTime() : null;
+            afterMutation();
+          }
+          refreshCardsList();
+        });
+      });
+      wrap.querySelectorAll("[data-card-exp-clear]").forEach(function(b){
+        b.addEventListener("click", function(){
+          var id = Number(b.getAttribute("data-card-exp-clear"));
+          var c = DB.cards.find(function(x){ return x.id === id; });
+          if (c){ c.expiresAt = null; afterMutation(); }
+          refreshCardsList();
+        });
+      });
+    }
+    function refreshCardsList(){
+      var wrap = document.getElementById("cards-list");
+      if (wrap){ wrap.innerHTML = cardsListHtml(); wireCardsList(); }
+    }
+    function wireCards(){
+      document.getElementById("gen-form").addEventListener("submit", function(e){
+        e.preventDefault();
+        var n = Number(document.getElementById("gen-count").value);
+        if (!Number.isInteger(n) || n < 1 || n > 200){
+          adminState.genError = "數量請輸入 1 到 200"; renderAdmin(); return;
+        }
+        var pidVal = document.getElementById("gen-product").value;
+        var pid = pidVal ? Number(pidVal) : null;
+        var bind = document.getElementById("gen-bind").checked;
+        var expiryVal = document.getElementById("gen-expiry").value;
+        var expiresAt = expiryVal ? new Date(expiryVal).getTime() : null;
+        var pool = bind
+          ? DB.inventory.filter(function(i){ return i.boundCardId == null && (pid == null || i.productId === pid); })
+          : [];
+        var existing = {};
+        DB.cards.forEach(function(c){ existing[c.code] = true; });
+        var codes = [];
+        for (var k = 0; k < n; k++){
+          var code = genCode();
+          while (existing[code]) code = genCode();
+          existing[code] = true;
+          var inv = pool[k] || null;
+          var card = {
+            id: DB.seq.card++, code: code,
+            inventoryId: inv ? inv.id : null, productId: pid,
+            expiresAt: expiresAt, disabled: false,
+            queryCount: 0, firstQueriedAt: null, lastQueriedAt: null, createdAt: Date.now()
+          };
+          DB.cards.push(card);
+          if (inv) inv.boundCardId = card.id;
+          codes.push(code);
+        }
+        adminState.generated = codes;
+        adminState.genError = "";
+        afterMutation();
+        renderAdmin();
+      });
+      var search = document.getElementById("card-search");
+      search.addEventListener("input", function(){
+        adminState.cardSearch = search.value;
+        refreshCardsList();
+      });
+      wireCardsList();
+    }
+
+    /* ---- 商品 ---- */
+    function productsHtml(){
+      var html = '<section aria-label="商品管理">' +
+        '<form class="panel" id="prod-form"><h2>' + (adminState.prodEditId != null ? "編輯商品" : "新增商品") + '</h2>' +
+        '<div class="grid2">' +
+        '<div><label class="a-label" for="prod-name">商品名稱</label><input id="prod-name" class="a-input" placeholder="例如：會員帳號（月）" value="' + esc(adminState.prodName) + '" /></div>' +
+        '<div><label class="a-label" for="prod-note">備註（選填）</label><input id="prod-note" class="a-input" value="' + esc(adminState.prodNote) + '" /></div>' +
+        '</div>' +
+        (adminState.prodError ? '<p class="form-err">' + esc(adminState.prodError) + '</p>' : "") +
+        '<div class="btn-row"><button type="submit" class="a-btn">' + (adminState.prodEditId != null ? "儲存修改" : "新增商品") + '</button>' +
+        (adminState.prodEditId != null ? '<button type="button" class="a-btn-ghost" id="prod-cancel">取消編輯</button>' : "") +
+        '</div></form><div class="list">';
+      if (!DB.products.length){
+        html += '<p class="empty">尚無商品，先在上方新增。</p>';
+      }
+      DB.products.forEach(function(p){
+        html += '<div class="row-card"><div class="row-top"><div class="row-main"><p class="row-title">' + esc(p.name) + '</p>' +
+          (p.note ? '<p class="row-meta">' + esc(p.note) + '</p>' : "") + '</div>' +
+          '<button type="button" class="a-btn-ghost" data-prod-edit="' + p.id + '">編輯</button>' +
+          '<button type="button" class="a-btn-danger" data-prod-del="' + p.id + '">刪除</button></div></div>';
+      });
+      html += '</div></section>';
+      return html;
+    }
+    function wireProducts(){
+      document.getElementById("prod-form").addEventListener("submit", function(e){
+        e.preventDefault();
+        var name = document.getElementById("prod-name").value.trim();
+        var note = document.getElementById("prod-note").value;
+        adminState.prodName = name; adminState.prodNote = note;
+        if (!name){ adminState.prodError = "請輸入商品名稱"; renderAdmin(); return; }
+        if (adminState.prodEditId != null){
+          var p = DB.products.find(function(x){ return x.id === adminState.prodEditId; });
+          if (p){ p.name = name; p.note = note; }
+        } else {
+          DB.products.push({ id: DB.seq.product++, name: name, note: note, createdAt: Date.now() });
+        }
+        adminState.prodEditId = null; adminState.prodName = ""; adminState.prodNote = ""; adminState.prodError = "";
+        afterMutation();
+        renderAdmin();
+      });
+      var cancel = document.getElementById("prod-cancel");
+      if (cancel) cancel.addEventListener("click", function(){
+        adminState.prodEditId = null; adminState.prodName = ""; adminState.prodNote = ""; adminState.prodError = ""; renderAdmin();
+      });
+      document.querySelectorAll("[data-prod-edit]").forEach(function(b){
+        b.addEventListener("click", function(){
+          var p = DB.products.find(function(x){ return x.id === Number(b.getAttribute("data-prod-edit")); });
+          if (!p) return;
+          adminState.prodEditId = p.id; adminState.prodName = p.name; adminState.prodNote = p.note; adminState.prodError = "";
+          renderAdmin();
+          window.scrollTo(0, 0);
+        });
+      });
+      document.querySelectorAll("[data-prod-del]").forEach(function(b){
+        b.addEventListener("click", function(){
+          confirmable(b, "刪除", function(){
+            var id = Number(b.getAttribute("data-prod-del"));
+            DB.products = DB.products.filter(function(x){ return x.id !== id; });
+            afterMutation();
+            renderAdmin();
+          });
+        });
+      });
+    }
+
+    /* ---- 發布・GitHub 同步 ---- */
+    function publishHtml(){
+      var gh = loadGh();
+      var html = '<section aria-label="發布與 GitHub 同步">' +
+        '<div class="panel"><h2>GitHub 自動同步設定</h2>' +
+        '<p class="sub">設定一次之後，後台每次新增／編輯／刪除庫存、產生／停用卡密、修改網站設定，都會自動把最新加密版 data.json 推送到這個儲存庫，前台客人重新查詢就能看到。</p>' +
+        '<div class="grid2">' +
+        '<div><label class="a-label" for="gh-owner">儲存庫 Owner</label><input id="gh-owner" class="a-input" value="' + esc(gh.owner) + '" autocomplete="off" /></div>' +
+        '<div><label class="a-label" for="gh-repo">儲存庫名稱（Repo）</label><input id="gh-repo" class="a-input" value="' + esc(gh.repo) + '" autocomplete="off" /></div>' +
+        '<div><label class="a-label" for="gh-branch">分支（Branch）</label><input id="gh-branch" class="a-input" value="' + esc(gh.branch) + '" autocomplete="off" /></div>' +
+        '<div><label class="a-label" for="gh-token">GitHub 細粒度存取權杖（Fine-grained PAT）</label><input id="gh-token" class="a-input" type="password" value="' + esc(gh.token) + '" autocomplete="off" placeholder="github_pat_…" /></div>' +
+        '</div>' +
+        '<p class="token-note"><strong>權杖安全：</strong>權杖只儲存在你這台裝置、這個瀏覽器的 localStorage 裡，<strong>絕不會</strong>寫進網頁程式碼、data.json 或任何上傳到 GitHub 的內容；同步時只透過 HTTPS 送到 GitHub 官方 API 驗證身分。<br />' +
+        '<strong>申請路徑：</strong>GitHub → 右上角頭像 → Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate new token。建立時只選這個儲存庫（Only select repositories），Repository permissions 裡把 <strong>Contents</strong> 設為 <strong>Read and write</strong>，其餘不用開，並設定有效期限。</p>' +
+        (adminState.ghMsg ? '<p class="form-ok">' + esc(adminState.ghMsg) + '</p>' : "") +
+        '<div class="btn-row"><button type="button" class="a-btn" id="gh-save">儲存同步設定</button>' +
+        '<button type="button" class="a-btn-ghost" id="gh-test">儲存並立即同步一次</button></div>' +
+        '<div class="sync-bar" id="pub-sync-status" style="margin-top:1rem;margin-bottom:0">' + syncBarHtml() + '</div>' +
+        '</div>' +
+        '<div class="panel" style="margin-top:1rem"><h2>手動發布 data.json（未設定權杖時使用）</h2>' +
+        '<p class="sub">把目前全部卡密與庫存產生一份加密版 data.json。檔案裡只有密文、卡密雜湊與前台公開設定（店名、公告、使用說明、客服方式），沒有任何帳密明文。</p>' +
+        '<div class="btn-row"><button type="button" class="a-btn" id="pub-gen"' + (adminState.pubBusy ? " disabled" : "") + '>' + (adminState.pubBusy ? "產生中…" : "產生加密 data.json") + '</button>' +
+        (adminState.pubJson ? '<button type="button" class="a-btn" id="pub-download">下載 data.json</button><button type="button" class="a-btn-ghost" data-copy="" id="pub-copy">複製 data.json 內容</button>' : "") +
+        '</div>' +
+        (adminState.pubInfo ? '<p class="form-ok">' + esc(adminState.pubInfo) + '</p>' : "") +
+        (adminState.pubJson ? '<div class="preview-box"><pre>' + esc(adminState.pubJson) + '</pre></div>' : "") +
+        '<h2 style="margin-top:1.25rem">發布方式</h2>' +
+        '<ol class="pub-steps">' +
+        '<li>按上方按鈕產生並下載 <span class="mono">data.json</span>。</li>' +
+        '<li>打開 GitHub 儲存庫 <span class="mono">' + esc(gh.owner) + '/' + esc(gh.repo) + '</span>（與 index.html 同一個儲存庫）。</li>' +
+        '<li>把 data.json 上傳到儲存庫根目錄、與 <span class="mono">index.html</span> 同一層，覆蓋舊檔（Add file → Upload files，或開啟舊 data.json 後編輯貼上新內容再 Commit）。也可以請 Muse 代為上傳。</li>' +
+        '<li>上傳完成後前台即時生效：客人輸入卡密時會抓最新 data.json（已加 cache-busting 參數，不會讀到舊快取）。</li>' +
+        '</ol></div></section>';
+      return html;
+    }
+    function wirePublish(){
+      wireSyncBar();
+      function readGh(){
+        return {
+          token: document.getElementById("gh-token").value.trim(),
+          owner: document.getElementById("gh-owner").value.trim() || GH_DEFAULTS.owner,
+          repo: document.getElementById("gh-repo").value.trim() || GH_DEFAULTS.repo,
+          branch: document.getElementById("gh-branch").value.trim() || GH_DEFAULTS.branch
+        };
+      }
+      document.getElementById("gh-save").addEventListener("click", function(){
+        saveGh(readGh());
+        adminState.ghMsg = "已儲存同步設定。" + (loadGh().token ? "之後的資料異動會自動同步。" : "尚未填入權杖，目前仍是手動發布模式。");
+        renderAdmin();
+      });
+      document.getElementById("gh-test").addEventListener("click", function(){
+        saveGh(readGh());
+        adminState.ghMsg = "";
+        syncNow();
+      });
+      var gen = document.getElementById("pub-gen");
+      gen.addEventListener("click", function(){
+        adminState.pubBusy = true; adminState.pubInfo = "";
+        renderAdmin();
+        buildDataJson().then(function(built){
+          adminState.pubBusy = false;
+          adminState.pubJson = built.json;
+          adminState.pubInfo = "已產生：" + built.count + " 張卡密（其中 " + built.stocked + " 張已配好交付內容），產生時間 " + fmtTime(built.builtAt) + "。";
+          renderAdmin();
+        }).catch(function(){
+          adminState.pubBusy = false;
+          adminState.pubInfo = "產生失敗，請重新整理頁面再試一次。";
+          renderAdmin();
+        });
+      });
+      var dl = document.getElementById("pub-download");
+      if (dl) dl.addEventListener("click", function(){
+        var blob = new Blob([adminState.pubJson], { type: "application/json" });
+        var a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "data.json";
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 400);
+      });
+      var cp = document.getElementById("pub-copy");
+      if (cp){
+        cp.setAttribute("data-copy", adminState.pubJson);
+        cp.setAttribute("data-label", "複製 data.json 內容");
+        wireCopyButtons(document.getElementById("tab-body"));
+      }
+    }
+
+    /* ---- 網站設定 ---- */
+    function settingsHtml(){
+      var s = DB.settings;
+      return '<section aria-label="網站設定">' +
+        '<form class="panel" id="set-form"><h2>網站設定</h2>' +
+        '<div style="display:grid;gap:.75rem;margin-top:.75rem">' +
+        '<div><label class="a-label" for="set-shop">店名</label><input id="set-shop" class="a-input" value="' + esc(s.shopName) + '" /></div>' +
+        '<div><label class="a-label" for="set-announcement">網站公告（顯示在前台）</label><textarea id="set-announcement" class="a-input" rows="4">' + esc(s.announcement) + '</textarea></div>' +
+        '<div><label class="a-label" for="set-instructions">預設使用說明（庫存未填個別說明時使用）</label><textarea id="set-instructions" class="a-input" rows="4">' + esc(s.instructions) + '</textarea></div>' +
+        '<div><label class="a-label" for="set-support">客服聯繫方式（顯示在前台頁尾）</label><input id="set-support" class="a-input" placeholder="例如：Telegram @yourname 或客服信箱" value="' + esc(s.supportContact) + '" /></div>' +
+        '</div>' +
+        (adminState.setMsg ? '<p class="form-ok">' + esc(adminState.setMsg) + '</p>' : "") +
+        '<div class="btn-row"><button type="submit" class="a-btn">儲存設定</button></div></form>' +
+        '<form class="panel" id="pw-form" style="margin-top:1rem"><h2>變更站長密碼</h2>' +
+        '<div style="margin-top:.75rem"><label class="a-label" for="set-newpw">新密碼</label>' +
+        '<input id="set-newpw" class="a-input" type="password" autocomplete="new-password" placeholder="至少 6 個字元" /></div>' +
+        (adminState.pwMsg ? '<p class="form-ok">' + esc(adminState.pwMsg) + '</p>' : "") +
+        '<div class="btn-row"><button type="submit" class="a-btn">更新密碼</button></div></form></section>';
+    }
+    function wireSettings(){
+      document.getElementById("set-form").addEventListener("submit", function(e){
+        e.preventDefault();
+        var shop = document.getElementById("set-shop").value.trim();
+        if (!shop){ adminState.setMsg = "店名不能留空"; renderAdmin(); return; }
+        DB.settings.shopName = shop;
+        DB.settings.announcement = document.getElementById("set-announcement").value;
+        DB.settings.instructions = document.getElementById("set-instructions").value;
+        DB.settings.supportContact = document.getElementById("set-support").value;
+        adminState.setMsg = "已儲存，並已觸發同步（前台店名、公告、說明、客服方式會一起更新）。";
+        afterMutation();
+        renderAdmin();
+      });
+      document.getElementById("pw-form").addEventListener("submit", function(e){
+        e.preventDefault();
+        var pw = document.getElementById("set-newpw").value;
+        if (pw.length < 6){ adminState.pwMsg = "新密碼至少需要 6 個字元"; renderAdmin(); return; }
+        hashPassword(pw).then(function(h){
+          DB.settings.adminPasswordHash = h;
+          saveDb();
+          adminState.pwMsg = "密碼已更新，下次登入請用新密碼。";
+          renderAdmin();
+        });
+      });
+    }
+
+    /* ---- 查詢紀錄 ---- */
+    function logsHtml(){
+      var html = '<section aria-label="查詢紀錄"><div style="display:flex;flex-direction:column;gap:.5rem">';
+      if (!DB.logs.length){
+        html += '<p class="empty">尚無查詢紀錄。（紀錄只保存在查詢當下那台裝置的瀏覽器裡。）</p>';
+      }
+      DB.logs.slice(0, 100).forEach(function(l){
+        html += '<div class="log-row"><span class="pill ' + (l.success ? "pill-ok" : "pill-fail") + '">' + (l.success ? "成功" : "失敗") + '</span>' +
+          '<span class="mono" style="font-size:.875rem">' + esc(l.codeMasked) + '</span>' +
+          '<span style="font-size:.875rem;color:var(--a-dim)">' + esc(l.reason) + '</span>' +
+          '<span class="lt">' + fmtTime(l.createdAt) + '</span></div>';
+      });
+      html += '</div></section>';
+      return html;
+    }
+
+    /* ================= 啟動 ================= */
+    render();
+    fetchDataJson().then(function(){
+      if (!isAdminRoute() && !frontState.result){
+        var cur = document.getElementById("card-code");
+        var v = cur ? cur.value : "";
+        renderFront();
+        var inp = document.getElementById("card-code");
+        if (inp && v) inp.value = v;
+      }
+    });
+    </script>
+  </body>
+</html>
